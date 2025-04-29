@@ -11,19 +11,28 @@
 
 ## ☑️ FastAPI + Selenium + BeautifulSoup 서버 작동 흐름
 
-1. **venv 활성화**
+1. **가상환경(venv) 새로 생성하기**
+
+터미널(cmd, PowerShell, Git Bash 등)에서 해당 폴더로 이동한 뒤:
+
+```bash
+cd .\Nest-FE
+python -m venv venv
+```
+
+2. **venv 활성화**
 
 ```bash
 .\venv\Scripts\activate
 ```
 
-2. **필요한 패키지 설치 (최초 1회만 설치)**
+3. **필요한 패키지 설치 (최초 1회만 설치)**
 
 ```bash
 pip install fastapi uvicorn selenium beautifulsoup4 webdriver-manager apscheduler requests
 ```
 
-3. **FastAPI 서버 실행**
+4. **FastAPI 서버 실행**
 
 ```bash
 cd src/components/notice
@@ -32,6 +41,18 @@ uvicorn notice_crawler:app --host 0.0.0.0 --port 8000 --reload
 - `notice_crawler`: Python 파일명 (`.py` 확장자 제외)
 - `app`: FastAPI 인스턴스 객체명
 - `--reload`: 코드 변경 시 서버 자동 재시작 (개발용 옵션)
+
+5. **새로운 터미널에서 venv 해제하고 npm run dev 실행**
+
+5-1) 추가로 새로운 터미널(cmd, PowerShell, Git Bash 등) 띄우기
+   위치 :  .\Nest-FE
+
+5-2) venv 정상 해제(Windows cmd)
+```
+.\venv\Scripts\deactivate.bat
+```
+
+5-3) npm run dev
 
 ---
 
