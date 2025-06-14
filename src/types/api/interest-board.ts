@@ -4,11 +4,12 @@
 // [관심분야 게시판 글쓰기용 - board-write.tsx]
 // =========================================
 // 관심분야 게시글 작성 (POST)
-export interface CreatePostPayload {
-  title: string;
-  content: string;
+export interface CreatePostPayload {  // BE, redux 사용자 처리 완료 후, uid 추가하기
+  title: string;    
+  content: string;  
   tags: string[];
 }
+
 export interface CreatePostResponse {
   postId: number;
   message: string;
@@ -59,7 +60,10 @@ export interface PostSummary {   // 게시글 요약 (게시글 카드)
   postId: number;               // 게시글 id
   title: string;            // 게시글 제목
   previewContent: string;   // 본문 미리보기
-  authorName: string;       // 작성자 이름
+  author: {         // 작성자 정보
+    id: number;
+    name: string;
+  };
   tags: string[];           // 태그
   viewCount: number;        // 조회수
   likeCount: number;        // 좋아요수
@@ -106,7 +110,10 @@ export interface SearchPost {
   id: number;
   title: string;
   previewContent: string;
-  authorName: string;
+  author: {         // 작성자 정보
+    id: number;
+    name: string;
+  };
   tags: string[];
   viewCount: number;
   likeCount: number;

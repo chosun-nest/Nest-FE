@@ -6,72 +6,58 @@ import Login from "./routes/login";
 import SignUp from "./routes/signup";
 import PasswdReset from "./routes/passwd-reset";
 import Layout from "./components/layout/layout";
+
+import { useEffect, useState } from "react";
+import { useDispatch } from "react-redux";
+import { getMemberProfile } from "./api/profile/ProfileAPI";
+import { setUser, clearUser } from "./store/slices/userSlice";
+import { setAccessToken } from "./store/slices/authSlice"; // ✅ accessToken 복구용 추가
+
 import ProjectBoard from "./routes/project-board"; //yu-gyeom
 import ProjectDetail from "./routes/project-detail"; //yu-gyeom
+import ProjectEdit from "./routes/project-edit"; // yu-gyeom
 import ProjectApply from "./routes/project-apply"; // yu-gyeom
-// import NoticeBoard from "./routes/notice-board"; //yu-gyeom
-import NoticeBoard from "./components/notice/NoticeBoard"; //hye-rin
+import NoticeBoard from "./routes/NoticeBoard"; //hye-rin
 import InterestsBorad from "./routes/interests-borad"; //yeong-eun
 import InterestsDetail from "./routes/interests-detail"; //yeong-eun
-import BoardWrite from "./routes/board-write"; //yeong-eun
+import InterestWrite from "./routes/interests-write"; //yeong-eun
+import ProjectWrite from "./routes/project-write"; //yeong-eun
 
-import { useState } from "react";
 import GlobalBackdrop from "./components/easter/GlobalBackdrop";
 import { BackdropContext } from "./context/Backdropcontext";
-import Chat from "./routes/chat";
 import NotFound from "./routes/notfound";
 import ProtectedRoute from "./components/auth/protected-route";
 import Events from "./routes/events";
 import PublicRoute from "./components/auth/public-route";
 import ResetPassword from "./routes/reset-password";
 import GlobalModal from "./components/global/global-modal";
+import ChatMain from "./routes/chat-main";
+import OtherProfile from "./routes/other-profile";
 
 const router = createBrowserRouter([
   {
-    // Layout이 포함된 페이지 중중
-    // 인증이 필요하지 않은 페이지
     path: "/",
     element: <Layout />,
     children: [
+      { path: "", element: <Home /> },
+      { path: "project/:id", element: <ProjectDetail /> },
       {
-        path: "",
-        element: <Home />,
+        path: "project/:id/edit",
+        element: (
+          <ProtectedRoute>
+            <ProjectEdit />
+          </ProtectedRoute>
+        ),
       },
-      {
-        path: "project/:id",
-        element: <ProjectDetail />,
-      },
-
-      {
-        path: "project-apply",
-        element: <ProjectApply />,
-      },
-      {
-        path: "notice-board/", // ｈｙｅ－ｒｉｎ
-        element: <NoticeBoard />,
-      },
-      {
-        path: "interests-board/", // yeong-eun : 관심사 정보 게시판 페이지
-        element: <InterestsBorad />,
-      },
-      {
-        path: "interests-detail/:id", // yeong-eun : 관심 분야 정보 글쓰기 페이지
-        element: <InterestsDetail />,
-      },
-
-      {
-        path: "chat/",
-        element: <Chat />,
-      },
-      {
-        path: "events/",
-        element: <Events />,
-      },
+      { path: "project-apply", element: <ProjectApply /> },
+      { path: "notice-board/", element: <NoticeBoard /> },
+      { path: "interests-board/", element: <InterestsBorad /> },
+      { path: "interests-detail/:id", element: <InterestsDetail /> },
+      { path: "chat/", element: <ChatMain /> },
+      { path: "events/", element: <Events /> },
     ],
   },
-  // Layout이 필요하지 않은 로그인, 회원가입, 404에러처리 페이지
   {
-    // 인증이 필요한 페이지
     path: "/",
     element: (
       <ProtectedRoute>
@@ -81,24 +67,38 @@ const router = createBrowserRouter([
     children: [
       {
         path: "profile/",
-        element: <Profile />,
+        children: [
+          {
+            path: "", // /profile
+            element: <Profile />, // 내 프로필
+          },
+          {
+            path: ":id", // /profile/123
+            element: <OtherProfile />, // 타인 프로필
+          },
+        ],
       },
 
       {
         path: "profile-edit/",
         element: <ProfileEdit />,
       },
-      // {
-      //   path: "interests-write",
-      //   element: <InterestsWrite />,   // 게시판 글쓰기 페이지 통합함.
-      // },
       {
-        path: "board-write/", // yeong-eun : 게시판 글쓰기 페이지
-        element: <BoardWrite />,
+        path: "interests-write",
+        element: (
+          <ProtectedRoute>
+            <InterestWrite />
+          </ProtectedRoute>
+        ),
       },
+      { path: "project-board/", element: <ProjectBoard /> },
       {
-        path: "project-board/",
-        element: <ProjectBoard />,
+        path: "project-write",
+        element: (
+          <ProtectedRoute>
+            <ProjectWrite />
+          </ProtectedRoute>
+        ),
       },
     ],
   },
@@ -118,7 +118,6 @@ const router = createBrowserRouter([
       </PublicRoute>
     ),
   },
-
   {
     path: "/password-reset",
     element: (
@@ -143,14 +142,42 @@ const router = createBrowserRouter([
 
 function App() {
   const [showBackdrop, setShowBackdrop] = useState(false);
+  const dispatch = useDispatch();
+
+  // ✅ accessToken 복구: localStorage → Redux store
+  useEffect(() => {
+    const token = localStorage.getItem("accessToken");
+    if (token) {
+      dispatch(setAccessToken(token));
+    }
+  }, [dispatch]);
+
+  // ✅ 유저 정보 로드
+  useEffect(() => {
+    const initUser = async () => {
+      try {
+        const user = await getMemberProfile();
+        dispatch(
+          setUser({
+            memberId: user.memberId,
+            memberName: user.memberName,
+            memberRole: user.memberRole,
+          })
+        );
+      } catch {
+        dispatch(clearUser());
+      }
+    };
+
+    initUser();
+  }, [dispatch]);
+
   return (
-    <>
-      <BackdropContext.Provider value={{ showBackdrop, setShowBackdrop }}>
-        <GlobalModal />
-        <GlobalBackdrop visible={showBackdrop} />
-        <RouterProvider router={router} />
-      </BackdropContext.Provider>
-    </>
+    <BackdropContext.Provider value={{ showBackdrop, setShowBackdrop }}>
+      <GlobalModal />
+      <GlobalBackdrop visible={showBackdrop} />
+      <RouterProvider router={router} />
+    </BackdropContext.Provider>
   );
 }
 

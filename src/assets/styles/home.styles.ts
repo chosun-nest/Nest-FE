@@ -56,3 +56,9 @@ export const ItemTitle = styled.div`
   border-bottom: 1px solid #00256c;
   padding-bottom: 8px;
 `;
+
+export const ItemContent = styled.div`
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+`;

@@ -11,11 +11,11 @@ import BoardTagFilterButton from "../components/board/tag/BoardTagFilterButton";
 import TagFilterModal from "../components/board/tag/TagFilterModal";
 import InterestBoardSortTabs from "../components/interests/board/InterestBoardSortTabs";
 import InterestPostCardList from "../components/interests/board/InterestPostCardList";
-import InterestBoardWriteButton from "../components/board/tag/BoardWriteButton";
+import InterestBoardWriteButton from "../components/board/write/BoardWriteButton";
 import Pagination from "../components/interests/board/Pagination";
 
 import { fetchPosts, searchPosts } from "../api/interests/InterestsAPI";
-import type { PostSummary, SearchPost } from "../api/types/interest-board";
+import type { PostSummary, SearchPost } from "../types/api/interest-board";
 
 import Modal from "../components/common/modal";
 import type { ModalContent } from "../types/modal";
@@ -92,7 +92,7 @@ export default function InterestBoard() {
             postId: "postId" in post ? post.postId : post.id,
             title: post.title,
             previewContent: post.previewContent,
-            authorName: post.authorName,
+            author: post.author,
             tags: post.tags ?? [],
             createdAt: post.createdAt,
             viewCount: post.viewCount ?? 0,

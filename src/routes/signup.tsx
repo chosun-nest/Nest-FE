@@ -215,7 +215,13 @@ export default function SignUp() {
   return (
     <S.Container>
       {isLoading && (
-        <Modal title={"로딩중"} message={"잠시만 기다려 주세요."} />
+        <Modal
+          title={"로딩중"}
+          message={"잠시만 기다려 주세요."}
+          onClose={() => {
+            return;
+          }}
+        />
       )}
       {showModal && (
         <Modal

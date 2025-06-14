@@ -1,8 +1,10 @@
 // 프로필 카드 컴포넌트
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { GithubLogo, LinkedinLogo, InstagramLogo } from "phosphor-react";   // npm install phosphor-react
+import { GithubLogo, LinkedinLogo, InstagramLogo } from "phosphor-react"; // npm install phosphor-react
 import { getMemberProfile } from "../../../api/profile/ProfileAPI";
+import { ModalContent } from "../../../types/modal";
+import Modal from "../../common/modal";
 
 interface ProfileType {
   image: string;
@@ -10,7 +12,7 @@ interface ProfileType {
   email: string;
   major: string;
   introduce: string;
-  interests: string[];
+  //interests: string[];
   techStacks: string[];
   sns: string[];
 }
@@ -21,7 +23,13 @@ export default function ProfileCard() {
   const [loading, setLoading] = useState(true);
   const goToProfilePage = () => {
     navigate("/profile");
-  }
+  };
+  const [modalContent, setModalContent] = useState<ModalContent>({
+    title: "",
+    message: "",
+    type: "info",
+  });
+  const [showModal, setShowModal] = useState(false);
 
   const techColorMap: Record<string, string> = {
     Java: "bg-[#f89820] text-white",
@@ -108,11 +116,12 @@ export default function ProfileCard() {
           email: data.memberEmail,
           major: data.memberDepartmentResponseDtoList[0]?.departmentName || "",
           introduce: data.memberIntroduce || "",
-          interests: data.memberInterestResponseDtoList.map(
-            (i: { interestId: number; interestName: string }) => i.interestName
-          ),        
+          // interests: data.memberInterestResponseDtoList.map(
+          //   (i: { interestId: number; interestName: string }) => i.interestName
+          // ),
           techStacks: data.memberTechStackResponseDtoList.map(
-            (t: { techStackId: number; techStackName: string }) => t.techStackName
+            (t: { techStackId: number; techStackName: string }) =>
+              t.techStackName
           ),
           sns: [
             data.memberSnsUrl1,
@@ -123,6 +132,12 @@ export default function ProfileCard() {
         });
       } catch (err) {
         console.error("프로필 정보를 불러오지 못했습니다", err);
+        setModalContent({
+          title: "조회 실패",
+          message: "프로필 정보를 불러오지 못했습니다",
+          type: "error",
+        });
+        setShowModal(true);
       } finally {
         setLoading(false);
       }
@@ -139,126 +154,174 @@ export default function ProfileCard() {
   }
 
   return (
-    <div className="p-4 bg-white border shadow-md w-80 rounded-xl">
-      {/* 프로필 이미지 */}
-      <div className="flex justify-center mb-7">
-        <img
-          src={profile.image || "/assets/images/user.png"}
-          alt="Profile"
-          className="w-20 h-20 border rounded-full cursor-pointer sm:h-24 sm:w-24 md:h-28 md:w-28"
-          onClick={goToProfilePage} // 사진 누르면 profile 페이지로 navigate
-        />
-      </div>
+    <>
+      <div className="p-4 bg-white border shadow-md w-80 rounded-xl">
+        {/* 프로필 이미지 */}
+        <div className="flex justify-center mb-7">
+          <img
+            src={profile.image || "/assets/images/user.png"}
+            alt="Profile"
+            className="w-20 h-20 border rounded-full cursor-pointer sm:h-24 sm:w-24 md:h-28 md:w-28"
+            onClick={goToProfilePage} // 사진 누르면 profile 페이지로 navigate
+          />
+        </div>
 
-      {/* 이름 및 전공 정보, 재학생 인증 배찌 */}
-      <div className="flex items-center gap-2 mt-2 justify-left">
-        <h2 
-          className="text-lg font-bold cursor-pointer hover:underline"
-          onClick={goToProfilePage}     // 이름 누르면 profile 페이지로 navigate
-        >  
-          {profile.name}
-        </h2>
-        <div className="flex items-center gap-1">
-          <p className="text-gray-500">{profile.major}</p>
-          {(profile.email.endsWith("@chosun.ac.kr") || profile.email.endsWith("@chosun.kr")) && (
-            <img
-              src="/assets/images/verified-badge.png" // 원하는 뱃지 이미지 경로
-              alt="인증"
-              title="조선대 인증 이메일"
-              className="w-4 h-4"
+        {/* 이름 및 전공 정보, 재학생 인증 배찌 */}
+        <div className="flex items-center gap-2 mt-2 justify-left">
+          <h2
+            className="text-lg font-bold cursor-pointer hover:underline"
+            onClick={goToProfilePage} // 이름 누르면 profile 페이지로 navigate
+          >
+            {profile.name}
+          </h2>
+          <div className="flex items-center gap-1">
+            <p className="text-gray-500">{profile.major}</p>
+            {(profile.email.endsWith("@chosun.ac.kr") ||
+              profile.email.endsWith("@chosun.kr")) && (
+              <img
+                src="/assets/images/verified-badge.png" // 원하는 뱃지 이미지 경로
+                alt="인증"
+                title="조선대 인증 이메일"
+                className="w-4 h-4"
+              />
+            )}
+          </div>
+        </div>
+
+        {/* 한 줄 소개 */}
+        <p className="mt-2 text-sm text-left">{profile.introduce}</p>
+
+        {/* 관심사 태그
+        <div className="flex flex-wrap gap-2 mt-6 justify-left">
+          {profile.interests?.map((tag, i) => (
+            <span
+              key={i}
+              className="px-2 py-1 text-xs bg-gray-200 rounded-full"
+            >
+              #{tag}
+            </span>
+          ))}
+        </div> */}
+
+        {/* 기술 스택 */}
+        <div className="flex flex-wrap gap-2 mt-5 justify-left">
+          {profile.techStacks?.map((stack, i) => {
+            const colorClass = techColorMap[stack] || "bg-blue-200 text-white";
+            return (
+              <span
+                key={i}
+                className={`px-4 py-2 rounded-xs text-xs font-mono ${colorClass}`}
+              >
+                {stack}
+              </span>
+            );
+          })}
+        </div>
+
+        {/* SNS 아이콘 */}
+        <div className="flex items-center justify-center gap-3 mt-10">
+          {profile.sns?.[0] ? (
+            <a href={profile.sns[0]} target="_blank" rel="noreferrer">
+              <GithubLogo
+                size={48}
+                color="#002f6c"
+                alt="GitHub"
+                className="w-12 h-12 cursor-pointer hover:opacity-80"
+              />
+            </a>
+          ) : (
+            <GithubLogo
+              size={48}
+              color="#002f6c"
+              alt="GitHub"
+              className="w-12 h-12 cursor-pointer hover:opacity-80"
+              // 기존 alert 대신 모달 오픈
+              onClick={() => {
+                setModalContent({
+                  title: "알림",
+                  message:
+                    "아직 등록되지 않은 링크입니다.\n수정 버튼을 눌러 프로필을 수정하세요.",
+                  type: "info",
+                });
+                setShowModal(true);
+              }}
+            />
+          )}
+          {profile.sns?.[1] ? (
+            <a href={profile.sns[1]} target="_blank" rel="noreferrer">
+              <LinkedinLogo
+                size={48}
+                color="#002f6c"
+                alt="LinkedIn"
+                className="w-12 h-12 cursor-pointer hover:opacity-80"
+              />
+            </a>
+          ) : (
+            <LinkedinLogo
+              size={48}
+              color="#002f6c"
+              alt="LinkedIn"
+              className="w-12 h-12 cursor-pointer hover:opacity-80"
+              // 기존 alert 대신 모달 오픈
+              onClick={() => {
+                setModalContent({
+                  title: "알림",
+                  message:
+                    "아직 등록되지 않은 링크입니다.\n수정 버튼을 눌러 프로필을 수정하세요.",
+                  type: "info",
+                });
+                setShowModal(true);
+              }}
+            />
+          )}
+          {profile.sns?.[2] ? (
+            <a href={profile.sns[2]} target="_blank" rel="noreferrer">
+              <InstagramLogo
+                size={48}
+                color="#002f6c"
+                alt="Instagram"
+                className="w-12 h-12 cursor-pointer hover:opacity-80"
+              />
+            </a>
+          ) : (
+            <InstagramLogo
+              size={48}
+              color="#002f6c"
+              alt="Instagram"
+              className="w-12 h-12 cursor-pointer hover:opacity-80"
+              // 기존 alert 대신 모달 오픈
+              onClick={() => {
+                setModalContent({
+                  title: "알림",
+                  message:
+                    "아직 등록되지 않은 링크입니다.\n수정 버튼을 눌러 프로필을 수정하세요.",
+                  type: "info",
+                });
+                setShowModal(true);
+              }}
             />
           )}
         </div>
-      </div>
-      
-      {/* 한 줄 소개 */}
-      <p className="mt-2 text-sm text-left">{profile.introduce}</p>
-      
-      {/* 관심사 태그 */}
-      <div className="flex flex-wrap gap-2 mt-6 justify-left">
-        {profile.interests?.map((tag, i) => (
-          <span key={i} className="px-2 py-1 text-xs bg-gray-200 rounded-full">
-            #{tag}
-          </span>
-        ))}
-      </div>
-      
-      {/* 기술 스택 */}
-      <div className="flex flex-wrap gap-2 mt-5 justify-left">
-        {profile.techStacks?.map((stack, i) => {
-          const colorClass = techColorMap[stack] || "bg-blue-200 text-white";
-          return (
-            <span
-              key={i}
-              className={`px-4 py-2 rounded-xs text-xs font-mono ${colorClass}`}
-            >
-              {stack}
-            </span>
-          );
-        })}
+
+        {/* 수정 버튼 */}
+        <div className="flex justify-center gap-2 mt-10">
+          <button
+            onClick={() => navigate("/profile-edit")}
+            className="px-20 py-2 text-white bg-blue-900 rounded-md whitespace-nowrap" // whitespace-nowrap 줄바꿈(글자 깨짐 방지)
+          >
+            프로필 수정
+          </button>
+        </div>
       </div>
 
-      {/* SNS 아이콘 */}
-      <div className="flex items-center justify-center gap-3 mt-10">
-        {profile.sns?.[0] ? (
-          <a href={profile.sns[0]} target="_blank" rel="noreferrer">
-            <GithubLogo
-              size={48} color="#002f6c"
-              alt="GitHub"
-              className="w-12 h-12 cursor-pointer hover:opacity-80"
-            />
-          </a>
-        ) : (
-          <GithubLogo
-              size={48} color="#002f6c"
-              alt="GitHub"
-            className="w-12 h-12 cursor-pointer hover:opacity-80"
-            onClick={() => alert("아직 등록되지 않은 링크입니다.\n수정 버튼을 눌러 프로필을 수정하세요.")}
-          />
-        )}
-        {profile.sns?.[1] ? (
-          <a href={profile.sns[1]} target="_blank" rel="noreferrer">
-            <LinkedinLogo 
-              size={48} color="#002f6c"
-              alt="LinkedIn"
-              className="w-12 h-12 cursor-pointer hover:opacity-80"
-            />
-          </a>
-        ) : (
-          <LinkedinLogo 
-              size={48} color="#002f6c"
-              alt="LinkedIn"
-            className="w-12 h-12 cursor-pointer hover:opacity-80"
-            onClick={() => alert("아직 등록되지 않은 링크입니다.\n수정 버튼을 눌러 프로필을 수정하세요.")}
-          />
-        )}
-        {profile.sns?.[2] ? (
-          <a href={profile.sns[2]} target="_blank" rel="noreferrer">
-            <InstagramLogo
-              size={48} color="#002f6c"
-              alt="Instagram"
-              className="w-12 h-12 cursor-pointer hover:opacity-80"
-            />
-          </a>  
-        ) : (
-          <InstagramLogo
-              size={48} color="#002f6c"
-              alt="Instagram"
-            className="w-12 h-12 cursor-pointer hover:opacity-80"
-            onClick={() => alert("아직 등록되지 않은 링크입니다.\n수정 버튼을 눌러 프로필을 수정하세요.")}
-          />
-        )}
-      </div>
-      
-      {/* 수정 버튼 */}
-      <div className="flex justify-center gap-2 mt-10">
-        <button
-          onClick={() => navigate("/profile-edit")}
-          className="px-20 py-2 text-white bg-blue-900 rounded-md whitespace-nowrap" // whitespace-nowrap 줄바꿈(글자 깨짐 방지)
-        >
-          프로필 수정
-        </button>
-      </div>
-    </div>
+      {showModal && (
+        <Modal
+          title={modalContent.title}
+          message={modalContent.message}
+          type={modalContent.type}
+          onClose={() => setShowModal(false)} // 모달 닫기 핸들러
+        />
+      )}
+    </>
   );
 }

@@ -18,7 +18,7 @@ export const ChatContainer = styled.div<{ isMobile: boolean }>`
   border: 1px solid #002f6c;
   overflow: hidden;
   width: 100%;
-  height: 100%; /* Container가 차지하는 남은 높이를 모두 사용 */
+  height: 100%;
 
   ${({ isMobile }) =>
     isMobile
@@ -40,14 +40,17 @@ export const ChatContainer = styled.div<{ isMobile: boolean }>`
 
 export const MessagesContainer = styled.div<{ isMobile?: boolean }>`
   flex: 1;
-  overflow-y: auto;
+<<<<<<< HEAD
+  overflow-y: hidden; /* ✅ 스크롤 제거 */
+=======
+  overflow-y: hidden;
+>>>>>>> origin/dev
   background-color: #fff;
 
   ${({ isMobile }) =>
     isMobile
       ? css`
-          // ChatContainer에 패딩을 줬으므로 여기서는 0으로 유지해도 됩니다.
-          padding: 10px 0; /* 위아래 10px, 좌우 0 */
+          padding: 10px 0;
         `
       : css`
           flex: 3;
@@ -63,8 +66,7 @@ export const InputContainer = styled.div<{ isMobile?: boolean }>`
   ${({ isMobile }) =>
     isMobile
       ? css`
-          // ChatContainer에 패딩을 줬으므로 여기서는 0으로 유지해도 됩니다.
-          padding: 10px 0; /* 위아래 10px, 좌우 0 */
+          padding: 10px 0;
           border-top: 1px solid #ccc;
         `
       : css`
@@ -75,16 +77,13 @@ export const InputContainer = styled.div<{ isMobile?: boolean }>`
           border-top: none;
         `}
 `;
-
 export const Underbar = styled.div`
   display: flex;
   flex-direction: row;
   border-radius: 8px;
   border: 1px solid #002f6c;
   width: 100%;
-  min-height: 40px;
-  height: 15%;
-  max-height: 100px;
+  height: 60px;
   box-shadow: 0 -1px 2px rgba(0, 0, 0, 0.1);
   margin-top: 10px;
   margin-bottom: 10px;
@@ -94,16 +93,18 @@ export const Underbar = styled.div`
 
 export const UnderbarItem = styled.div`
   display: flex;
+  flex: 1;
   flex-direction: column;
-  font-family: "Monomaniac One", sans-serif;
   align-items: center;
   justify-content: center;
-  width: 100%;
+  font-family: "Monomaniac One", sans-serif;
   height: 100%;
   cursor: pointer;
+
   &:hover {
     background-color: #002f6c38;
   }
+
   svg {
     width: 24px;
     height: 24px;

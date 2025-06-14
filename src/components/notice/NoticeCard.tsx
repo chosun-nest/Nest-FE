@@ -1,13 +1,4 @@
-interface Notice {
-  number: string;
-  title: string;
-  writer: string;
-  date: string;
-  views: string;
-  link: string;
-  category?: string;
-  deadline?: string;
-}
+import { Notice } from "../../routes/NoticeBoard";
 
 const NoticeCard = ({ notice }: { notice: Notice }) => {
   return (
@@ -51,7 +42,9 @@ const NoticeCard = ({ notice }: { notice: Notice }) => {
           marginTop: "8px",
         }}
       >
-        <span>{notice.writer} · {notice.date}</span>
+        <span>
+          {notice.writer} · {notice.date}
+        </span>
         <span>조회수 {notice.views}</span>
       </div>
     </div>

@@ -1,19 +1,22 @@
 // 게시판 선택 드롭다운
 import { useState, useRef, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+
+type BoardType = "interests" | "projects";
 
 interface Props {
-  boardType: "interests" | "projects";
-  setBoardType: (value: "interests" | "projects") => void;
+  boardType: BoardType;
 }
 
-const boardTypeMap: Record<"interests" | "projects", string> = {
+const boardTypeMap: Record<BoardType, string> = {
   interests: "관심분야 정보 게시글 쓰기",
   projects: "프로젝트 모집 게시글 쓰기",
 };
 
-export default function BoardTypeSelector({ boardType, setBoardType }: Props) {
+export default function BoardTypeSelector({ boardType }: Props) {
   const [open, setOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
 
   const handleOutsideClick = (e: MouseEvent) => {
     if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
@@ -26,9 +29,10 @@ export default function BoardTypeSelector({ boardType, setBoardType }: Props) {
     return () => document.removeEventListener("mousedown", handleOutsideClick);
   }, []);
 
-  const handleSelect = (value: "interests" | "projects") => {
-    setBoardType(value);
+  const handleSelect = (value: BoardType) => {
     setOpen(false);
+    if (value === boardType) return; // 현재 페이지와 같으면 무시
+    navigate(value === "interests" ? "/interests-write" : "/project-write");
   };
 
   return (
@@ -38,7 +42,7 @@ export default function BoardTypeSelector({ boardType, setBoardType }: Props) {
         className="text-2xl font-bold text-[#002F6C] flex items-center gap-2"
       >
         {boardTypeMap[boardType]}
-        <span className="text-sm text-[#002F6C]">{open ? "▲" : "▼"}</span>
+        <span className="text-sm">{open ? "▲" : "▼"}</span>
       </button>
 
       {open && (
@@ -50,7 +54,7 @@ export default function BoardTypeSelector({ boardType, setBoardType }: Props) {
                 className={`px-4 py-2 cursor-pointer hover:bg-gray-100 ${
                   key === boardType ? "bg-blue-100 font-semibold text-blue-700" : ""
                 }`}
-                onClick={() => handleSelect(key as "interests" | "projects")}
+                onClick={() => handleSelect(key as BoardType)}
               >
                 {label}
               </li>

@@ -8,11 +8,11 @@ export default function ParticipantsInput({ participants, setParticipants }: Pro
   return (
     <div className="mb-4 mt-7">
       <label className="block mb-2 text-lg font-semibold text-gray-500">
-        참여인원/정원
+        최대 참여 인원
       </label>
       <input
         className="w-full p-3 border rounded"
-        placeholder="예: 3/6"
+        placeholder="최대 참여 인원 수를 적어주세요"
         value={participants}
         onChange={(e) => setParticipants(e.target.value)}
       />

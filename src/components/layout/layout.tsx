@@ -8,11 +8,13 @@ import Footer from "./footer";
 export default function Layout() {
   const navbarRef = useRef<HTMLDivElement>(null);
   const [navbarHeight, setNavbarHeight] = useState(0);
+
   useEffect(() => {
     if (navbarRef.current) {
       setNavbarHeight(navbarRef.current.offsetHeight);
     }
   }, []);
+
   return (
     <NavbarHeightContext.Provider value={{ navbarHeight, setNavbarHeight }}>
       <Navbar ref={navbarRef} />
