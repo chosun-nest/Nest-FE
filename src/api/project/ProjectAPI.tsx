@@ -18,25 +18,30 @@ export const createProjectPost = async (
   return response.data;
 };
 
-// ✅ 프로젝트 목록 조회
+// ✅ 프로젝트 목록 조회 (쿼리 파라미터: page, size, sort, tags)
 export const getProjects = async (params: {
-  "pageable.page": number;
-  "pageable.size": number;
-  "pageable.sort": string;
+  page: number;
+  size: number;
+  sort: string;
   tags?: string[];
 }): Promise<ProjectListResponse> => {
   const queryParams = new URLSearchParams();
-  queryParams.append("pageable.page", String(params["pageable.page"]));
-  queryParams.append("pageable.size", String(params["pageable.size"]));
-  queryParams.append("pageable.sort", params["pageable.sort"]);
 
+  if (params.page !== undefined)
+    queryParams.append("page", String(params.page));
+  if (params.size !== undefined)
+    queryParams.append("size", String(params.size));
+  if (params.sort) queryParams.append("sort", params.sort);
   if (params.tags?.length) {
     params.tags.forEach((tag) => queryParams.append("tags", tag));
   }
 
-  const response = await API.get(`/api/v1/projects?${queryParams.toString()}`, {
-    headers: { skipAuth: true },
-  });
+  const response = await API.get<ProjectListResponse>(
+    `/api/v1/projects?${queryParams.toString()}`,
+    {
+      headers: { skipAuth: true },
+    }
+  );
 
   return response.data;
 };
@@ -46,24 +51,27 @@ export const searchProjects = async (params: {
   keyword: string;
   searchType?: "ALL" | "TITLE" | "CONTENT";
   tags?: string[];
-  "pageable.page": number;
-  "pageable.size": number;
-  "pageable.sort": string;
+  page: number;
+  size: number;
+  sort: string;
 }): Promise<ProjectListResponse> => {
   const queryParams = new URLSearchParams();
   queryParams.append("keyword", params.keyword);
   if (params.searchType) queryParams.append("searchType", params.searchType);
-  queryParams.append("pageable.page", String(params["pageable.page"]));
-  queryParams.append("pageable.size", String(params["pageable.size"]));
-  queryParams.append("pageable.sort", params["pageable.sort"]);
+  queryParams.append("page", String(params.page));
+  queryParams.append("size", String(params.size));
+  queryParams.append("sort", params.sort);
 
   if (params.tags?.length) {
     params.tags.forEach((tag) => queryParams.append("tags", tag));
   }
 
-  const response = await API.get(`/api/v1/projects/search?${queryParams.toString()}`, {
-    headers: { skipAuth: true },
-  });
+  const response = await API.get<ProjectListResponse>(
+    `/api/v1/projects/search?${queryParams.toString()}`,
+    {
+      headers: { skipAuth: true },
+    }
+  );
 
   return response.data;
 };
@@ -93,11 +101,14 @@ export const deleteProject = async (
 };
 
 // ✅ 프로젝트 모집글에 지원
-export const applyToProject = async (
-  projectId: number,
-  payload: ProjectApplyRequest
-): Promise<ProjectApplyResponse> => {
-  const response = await API.post(`/api/v1/projects/${projectId}/apply`, payload);
+export const applyToProject = async (payload: ProjectApplyRequest) => {
+  const response = await API.post(
+    `/api/v1/projects/${payload.projectId}/apply`,
+    { part: payload.part },
+    {
+      headers: { skipAuth: false },
+    }
+  );
   return response.data;
 };
 
@@ -105,14 +116,20 @@ export const applyToProject = async (
 export const getApplicantsByProjectId = async (
   projectId: number
 ): Promise<ProjectApplyResponse[]> => {
-  const response = await API.get(`/api/v1/projects/${projectId}/applications`);
+  const response = await API.get(`/api/v1/projects/${projectId}/applications`, {
+    headers: { skipAuth: false },
+  });
   return response.data;
 };
 
 // ✅ 지원서 상태 변경 (수락 / 거절)
 export const updateApplicationStatus = async (
+  projectId: number,
   applicationId: number,
-  status: "accepted" | "rejected"
+  status: "accept" | "reject"
 ): Promise<void> => {
-  await API.patch(`/api/v1/applications/${applicationId}/status`, { status });
+  await API.post(
+    `/api/v1/projects/${projectId}/applications/${applicationId}/${status}`,
+    { headers: { skipAuth: false } }
+  );
 };

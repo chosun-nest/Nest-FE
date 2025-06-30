@@ -5,9 +5,9 @@ import { useSelector } from "react-redux";
 import { selectAccessToken } from "../store/slices/authSlice";
 
 import Navbar from "../components/layout/navbar";
-import InterestBoardHeader from "../components/interests/board/InterestBoardHeader";
 import InterestBoardSearch from "../components/interests/board/InterestBoardSearch";
 import BoardTagFilterButton from "../components/board/tag/BoardTagFilterButton";
+import SelectedTagList from "../components/board/tag/SelectedTagList";
 import TagFilterModal from "../components/board/tag/TagFilterModal";
 import InterestBoardSortTabs from "../components/interests/board/InterestBoardSortTabs";
 import InterestPostCardList from "../components/interests/board/InterestPostCardList";
@@ -137,20 +137,41 @@ export default function InterestBoard() {
       <Navbar ref={navbarRef} />
       <div
         className="max-w-4xl min-h-screen p-4 mx-auto bg-white"
-        style={{ paddingTop: navHeight }}
+        style={{ paddingTop: navHeight + 20 }}
       >
-        <InterestBoardHeader postCount={totalCount} />
+        
+      <div className="px-1 mb-6">
+        {/* 제목, 정렬버튼(최신순, 좋아요순) */}
+        <div className="px-1 mb-3">
+          <div className="flex items-center justify-between">
+            <h2 className="text-2xl font-bold text-[#00256c]">관심분야 정보 게시판</h2>
+            <InterestBoardSortTabs sortType={sortType} onChange={setSortType} />
+          </div>
+        </div>
 
-        <InterestBoardSearch
-          searchKeyword={searchKeyword}
-          setSearchKeyword={setSearchKeyword}
-        />
+        {/* 구분선 */}
+        <hr className="mb-4 border-t border-gray-300" />
 
-        <BoardTagFilterButton
+        {/* 게시물 수, 검색창, 태그 버튼 */}
+        <div className="flex flex-col gap-2 mb-6 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-sm text-gray-700">
+            총 <strong>{totalCount}</strong>개의 게시물이 있습니다.
+          </p>
+
+          <div className="flex gap-2">
+            <InterestBoardSearch
+              searchKeyword={searchKeyword}
+              setSearchKeyword={setSearchKeyword}
+            />
+            <BoardTagFilterButton onOpenFilter={() => setShowFilterModal(true)} />
+          </div>
+        </div>
+        {/* 태그 리스트 */}
+        <SelectedTagList
           selectedTags={selectedTags}
           onRemoveTag={removeSelectedTag}
-          onOpenFilter={() => setShowFilterModal(true)}
         />
+      </div>
 
         {showFilterModal && (
           <TagFilterModal
@@ -161,8 +182,6 @@ export default function InterestBoard() {
             }}
           />
         )}
-
-        <InterestBoardSortTabs sortType={sortType} onChange={setSortType} />
 
         <InterestPostCardList posts={posts} onCardClick={handleCardClick} />
 

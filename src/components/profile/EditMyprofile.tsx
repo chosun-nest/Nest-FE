@@ -28,7 +28,7 @@ import { selectAccessToken } from "../../store/slices/authSlice";
 import { ModalContent } from "../../types/modal";
 import Modal from "../common/modal";
 
-export default function MyProfile() {
+export default function EditMyProfile() {
   const [isEditing, setIsEditing] = useState(false);
   const [profile, setProfile] = useState<ProfileFormData>({
     name: "",
@@ -231,65 +231,65 @@ export default function MyProfile() {
   };
 
   return (
-    <div className="max-w-2xl p-10 mx-auto bg-white shadow rounded-xl">
-      {showModal && (
-        <Modal
-          title={modalContent.title}
-          message={modalContent.message}
-          type={modalContent.type}
-          onClose={() => {
-            setShowModal(false);
-            modalContent.onClose?.();
-          }}
+    <div className="w-full max-w-2xl px-4 py-6 mx-auto bg-white shadow rounded-xl md:px-10 md:py-10">
+      <h2 className="mb-4 text-xl font-bold text-[#1e3a8a]">내 프로필 변경</h2>
+        {showModal && (
+          <Modal
+            title={modalContent.title}
+            message={modalContent.message}
+            type={modalContent.type}
+            onClose={() => {
+              setShowModal(false);
+              modalContent.onClose?.();
+            }}
+          />
+        )}
+
+        <EditProfileImage
+          image={profile.image}
+          isEditing={isEditing}
+          onChange={handleImageChange}
+          fileInputRef={fileInputRef}
         />
-      )}
-      <h2 className="mb-4 text-xl font-bold text-blue-900">내 프로필 변경</h2>
 
-      <EditProfileImage
-        image={profile.image}
-        isEditing={isEditing}
-        onChange={handleImageChange}
-        fileInputRef={fileInputRef}
-      />
+        <EditProfileField name={profile.name} email={profile.email} />
 
-      <EditProfileField name={profile.name} email={profile.email} />
+        <EditDepartment
+          isEditing={isEditing}
+          departmentInput={departmentInput}
+          onInputChange={handleDepartmentChange}
+          filteredDepartments={filteredDepartments}
+          onSelect={handleSelectDepartment}
+        />
 
-      <EditDepartment
-        isEditing={isEditing}
-        departmentInput={departmentInput}
-        onInputChange={handleDepartmentChange}
-        filteredDepartments={filteredDepartments}
-        onSelect={handleSelectDepartment}
-      />
+        <EditIntroduce
+          value={profile.introduce}
+          isEditing={isEditing}
+          onChange={(val) => handleChange("introduce", val)}
+        />
 
-      <EditIntroduce
-        value={profile.introduce}
-        isEditing={isEditing}
-        onChange={(val) => handleChange("introduce", val)}
-      />
+        <EditTechStacks
+          techStacks={profile.techStacks}
+          isEditing={isEditing}
+          newTech={newTech}
+          filtered={filteredTechs}
+          onInputChange={handleTechInputChange}
+          onSelect={handleSelectTech}
+          onDelete={handleDeleteTech}
+        />
 
-      <EditTechStacks
-        techStacks={profile.techStacks}
-        isEditing={isEditing}
-        newTech={newTech}
-        filtered={filteredTechs}
-        onInputChange={handleTechInputChange}
-        onSelect={handleSelectTech}
-        onDelete={handleDeleteTech}
-      />
+        <EditSNS
+          sns={profile.sns}
+          isEditing={isEditing}
+          onChange={(newSNS) => setProfile((prev: ProfileFormData) => ({ ...prev, sns: newSNS }))}
+        />
 
-      <EditSNS
-        sns={profile.sns}
-        isEditing={isEditing}
-        onChange={(newSNS) => setProfile((prev: ProfileFormData) => ({ ...prev, sns: newSNS }))}
-      />
-
-      <EditProfileButtons
-        isEditing={isEditing}
-        onCancel={() => setIsEditing(false)}
-        onSave={handleSave}
-        onEdit={() => setIsEditing(true)}
-      />
+        <EditProfileButtons
+          isEditing={isEditing}
+          onCancel={() => setIsEditing(false)}
+          onSave={handleSave}
+          onEdit={() => setIsEditing(true)}
+        />
     </div>
   );
 }

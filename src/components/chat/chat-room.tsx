@@ -38,10 +38,34 @@ export default function ChatRoom({
   const socketRef = useRef<Socket | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  const [isAtBottom, setIsAtBottom] = useState(true); // 하단 여부
+  const [hasNewMessage, setHasNewMessage] = useState(false); // 새로운 메시지 알림 여부
+  const scrollContainerRef = useRef<HTMLDivElement>(null); // 메시지 박스 컨테이너 ref
+
+  const handleScroll = () => {
+    const container = scrollContainerRef.current;
+    if (!container) return;
+
+    const threshold = 100; // px
+    const isBottom =
+      container.scrollHeight - container.scrollTop - container.clientHeight <
+      threshold;
+
+    setIsAtBottom(isBottom);
+
+    if (isBottom) setHasNewMessage(false);
   };
+
+  useEffect(() => {
+    const container = scrollContainerRef.current;
+    if (!container) return;
+
+    if (isAtBottom) {
+      container.scrollTop = container.scrollHeight;
+    } else {
+      setHasNewMessage(true);
+    }
+  }, [messages]);
 
   const fetchUserProfile = useCallback(async () => {
     try {
@@ -166,23 +190,41 @@ export default function ChatRoom({
     );
 
   return (
-    <>
-      {" "}
-      <div className=" overflow-auto ">
-        {/* 메시지 영역 */}
-        <div className="flex-1 px-4 py-3 bg-white overflow-y-auto">
-          {messages.map((msg) => (
-            <ChatBubble
-              key={msg.id}
-              message={msg}
-              isMe={msg.userName === String(currentUser.memberName)}
-            />
-          ))}
-          <div ref={messagesEndRef} />
-        </div>
-      </div>{" "}
+    <div className="flex flex-col flex-1 min-h-0 relative">
+      {/* 새로운 메시지 알림 버튼 */}
+      {hasNewMessage && (
+        <button
+          onClick={() => {
+            const container = scrollContainerRef.current;
+            if (container) {
+              container.scrollTop = container.scrollHeight;
+              setHasNewMessage(false);
+            }
+          }}
+          className="absolute bottom-20 right-4 z-10 bg-blue-500 text-white text-sm px-3 py-1 rounded-full shadow-md hover:bg-blue-600 transition"
+        >
+          ↓ 새로운 메시지
+        </button>
+      )}
+
+      {/* 메시지 영역 */}
+      <div
+        ref={scrollContainerRef}
+        onScroll={handleScroll}
+        className="flex-1 overflow-y-auto px-4 py-3 bg-white"
+      >
+        {messages.map((msg) => (
+          <ChatBubble
+            key={msg.id}
+            message={msg}
+            isMe={msg.userName === String(currentUser.memberName)}
+          />
+        ))}
+        <div ref={messagesEndRef} />
+      </div>
+
       {/* 입력창 */}
-      <div className="flex w-[100%] items-center gap-2 ">
+      <div className="flex w-full items-center gap-2 pt-2">
         <input
           value={inputMessage}
           onChange={handleInputChange}
@@ -198,6 +240,6 @@ export default function ChatRoom({
           전송
         </button>
       </div>
-    </>
+    </div>
   );
 }

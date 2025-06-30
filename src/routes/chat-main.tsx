@@ -15,7 +15,10 @@ import { checkMyFollowings } from "../api/following/follow";
 import { checkMyChatRooms, createRoom, enterRoom } from "../api/following/chat";
 import { useSelector } from "react-redux";
 import { selectCurrentUserId } from "../store/slices/userSlice";
-import { getMemberProfile } from "../api/profile/ProfileAPI";
+import {
+  getMemberProfile,
+  getMemberProfileById,
+} from "../api/profile/ProfileAPI";
 import io from "socket.io-client";
 
 const WS_SERVER_URL = import.meta.env.VITE_API_CHAT_URL;
@@ -38,16 +41,29 @@ export default function ChatMain() {
 
   // 🔹 팔로잉 목록
   useEffect(() => {
-    checkMyFollowings().then((data) => {
-      const mapped: SimpleMemberProfile[] = data.users.map((user) => ({
-        memberId: user.memberId,
-        memberName: user.memberName,
-        memberImageUrl: user.memberImageUrl,
-        memberIntroduce: user.memberIntroduce,
-        memberIsStudent: user.memberIsStudent,
-      }));
-      setFollowings(mapped);
-    });
+    const loadFollowings = async () => {
+      try {
+        const data = await checkMyFollowings();
+
+        const users = data.users as SimpleMemberProfile[];
+
+        const updatedUsers = await Promise.all(
+          users.map(async (user) => {
+            const profile = await getMemberProfileById(user.memberId);
+            return {
+              ...user,
+              memberImageUrl: profile.memberImageUrl,
+            };
+          })
+        );
+
+        setFollowings(updatedUsers);
+      } catch (err) {
+        console.error("팔로잉 목록 불러오기 실패:", err);
+      }
+    };
+
+    loadFollowings();
   }, []);
 
   // 🔹 나의 채팅방 목록 + 실시간 반영
@@ -59,7 +75,7 @@ export default function ChatMain() {
         const mappedRooms: ChatRoomProfile[] = myRooms.map((room: any) => ({
           roomId: room.chattingRoomId,
           roomName: room.chattingRoomName,
-          roomImageUrl: "/dm-chat.png",
+          roomImageUrl: "/assets/images/user.png",
           roomType: "dm",
           lastActivity: room.lastChattedAt || room.createdAt,
         }));
@@ -170,13 +186,13 @@ export default function ChatMain() {
 
   return (
     <S.Container navbarHeight={navbarHeight + 20}>
-      <h2 className="mb-2 pl-4 font-bold text-xl h-[10%] w-[66%] max-w-[800px] min-w-[400px] border border-[#002f6c] overflow-auto shadow-sm rounded-xl mx-auto flex items-center">
+      <h2 className="mb-2 pl-4 font-bold text-xl h-[10%] w-[85%] max-w-[800px] min-w-[350px] border border-[#002f6c] shadow-sm rounded-xl mx-auto flex items-center">
         {mode === "following" && "내 팔로잉 목록"}
         {mode === "room" && "채팅방 목록"}
         {mode === "chat" && selectedRoom && `${selectedRoom.roomName}의 채팅방`}
       </h2>
 
-      <div className="flex flex-col h-[100%] w-[66%] max-w-[800px] min-w-[400px] bg-white p-5 border border-[#002f6c] overflow-auto shadow-sm rounded-xl ">
+      <div className="flex flex-col flex-1 min-h-0 h-[100%] w-[85%] max-w-[800px] min-w-[350px] bg-white p-5 border border-[#002f6c] overflow-auto shadow-sm rounded-xl ">
         {mode === "following" && (
           <>
             <FollowingList

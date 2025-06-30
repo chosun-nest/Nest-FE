@@ -1,4 +1,4 @@
-// 계정 탈퇴 페이지
+// 계정 탈퇴
 import {useState} from "react";
 import { useDispatch } from "react-redux";
 import { withdrawMember } from "../../../../api/profile/ProfileAPI";
@@ -11,16 +11,11 @@ export default function Withdraw(){
   const [showWithdrawModal, setShowWithdrawModal] = useState(false);  // 탈퇴하기 버튼 누른 후 모달
   const [showCompleteModal, setShowCompleteModal] = useState(false);  // 탈퇴 완료 모달
 
-
   const handleWithdraw = async () => {
     try {
-      await withdrawMember(); // 탈퇴 API 호출
-      
-      // 로컬 스토리지 토큰 삭제
+      await withdrawMember();
       localStorage.removeItem("accesstoken");
       localStorage.removeItem("refreshToken");
-
-      // Redux 상태 초기화
       dispatch(clearTokens());
 
       setShowWithdrawModal(false);
@@ -33,24 +28,22 @@ export default function Withdraw(){
 
   return (
     <>
-      <div className="mb-4 text-right">
+      <div className="flex justify-end">
         <button
           onClick={() => setShowWithdrawModal(true)}
-          className="px-4 py-2 text-white bg-gray-500 rounded"
+          className="w-full px-4 py-2 text-white bg-gray-500 rounded sm:w-auto"
         >
           계정 탈퇴하기 &gt;
         </button>
       </div>
 
-      { /* 계정 탈퇴 모달 띄우기 */}
       {showWithdrawModal && (
         <WithdrawModal
           onClose={() => setShowWithdrawModal(false)}
-          onConfirm={handleWithdraw} // password 인자 제거
+          onConfirm={handleWithdraw}
         />
       )}
-      
-      { /* 계정 탈퇴 완료 모달 띄우기 */}
+
       {showCompleteModal && (
         <WithdrawCompleteModal onClose={() => setShowCompleteModal(false)} />
       )}

@@ -28,7 +28,8 @@ export interface PostDetail {   // 응답
   author: {         // 작성자 정보
     id: number;
     name: string;
-    profileImageUrl?: string;   // 작성자 프로필 이미지
+    //profileImageUrl?: string;   
+    // 작성자 프로필 이미지 > 댓글에서 프로필 띄운 것처럼 interestAPI의 author.id로 ProfileAPI에서 다른 사용자 이미지 불러와서 처리하기
   };
   viewCount: number;    // 조회수
   likeCount: number;    // 좋아요수

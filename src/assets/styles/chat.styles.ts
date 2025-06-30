@@ -67,10 +67,10 @@ export const Underbar = styled.div`
   flex-direction: row;
   border-radius: 8px;
   border: 1px solid #002f6c;
-  width: 66%;
+  width: 85%;
 
   max-width: 800px;
-  min-width: 400px;
+  min-width: 350px;
   height: 60px;
   box-shadow: 0 -1px 2px rgba(0, 0, 0, 0.1);
   margin-top: 10px;

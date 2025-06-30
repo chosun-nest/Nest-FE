@@ -14,7 +14,7 @@ interface PostDetailInfoProps {
 
 export default function PostDetailInfo({
   author,
-  isAuthor,
+  //isAuthor,
   createdAt,
   viewCount,
   onAuthorClick,

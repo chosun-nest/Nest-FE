@@ -2,33 +2,58 @@ import { useState, useEffect } from "react";
 import RecruitRoleCard from "./RecruitRoleCard";
 
 interface RecruitCardData {
-  id: number;
-  role: string; // 대문자 문자열: "FRONTEND", "BACKEND", ...
+  id: number; // 로컬 UI에서 식별용
+  role: string;
   authorName: string;
+  memberId?: number;
 }
 
 interface RecruitRoleListProps {
   onChange: (cards: RecruitCardData[]) => void;
   authorName: string;
+  onKickMember?: (memberId: number) => void;
+
+  defaultMembers?: { memberId: number; memberName: string; part: string }[];
 }
 
 export default function RecruitRoleList({
   onChange,
   authorName,
+  defaultMembers,
+  onKickMember,
 }: RecruitRoleListProps) {
   const [cards, setCards] = useState<RecruitCardData[]>([]);
+  const handleKick = (id: number) => {
+    const target = cards.find((c) => c.id === id);
+    if (target?.memberId && onKickMember) {
+      onKickMember(target.memberId); // ✅ 부모에게 알림
+    }
+    setCards((prev) => prev.filter((card) => card.id !== id));
+  };
 
-  // ✅ 초기 작성자 카드 1개 생성
+  // 🔒 무한 루프 방지를 위한 초기화 로직
   useEffect(() => {
-    const defaultCard: RecruitCardData = {
-      id: 1,
-      role: "FRONTEND", // ✅ 대문자로 고정
-      authorName,
-    };
-    setCards([defaultCard]);
-  }, [authorName]);
+    setCards((prev) => {
+      if (prev.length > 0) return prev; // 이미 초기화되어 있으면 무시
+      if (defaultMembers && defaultMembers.length > 0) {
+        return defaultMembers.map((member, idx) => ({
+          id: idx + 1,
+          role: member.part.toUpperCase(),
+          authorName: member.memberName,
+          memberId: member.memberId,
+        }));
+      } else {
+        return [
+          {
+            id: 1,
+            role: "FRONTEND",
+            authorName,
+          },
+        ];
+      }
+    });
+  }, []); // ✅ 최초 1회만 실행
 
-  // ✅ 카드 배열 변경 시 상위 컴포넌트에 전달
   useEffect(() => {
     onChange(cards);
   }, [cards, onChange]);
@@ -37,8 +62,8 @@ export default function RecruitRoleList({
     const newId = cards.length > 0 ? cards[cards.length - 1].id + 1 : 1;
     const newCard: RecruitCardData = {
       id: newId,
-      role: "FRONTEND", // ✅ 기본값도 대문자로
-      authorName: "모집중", // 추가 카드는 '모집중'으로 고정
+      role: "FRONTEND",
+      authorName: "모집중",
     };
     setCards((prev) => [...prev, newCard]);
   };
@@ -46,9 +71,7 @@ export default function RecruitRoleList({
   const handleChangeRole = (id: number, newRole: string) => {
     setCards((prev) =>
       prev.map((card) =>
-        card.id === id
-          ? { ...card, role: newRole.toUpperCase() } // ✅ 혹시 lowercase로 들어와도 대문자로 변환
-          : card
+        card.id === id ? { ...card, role: newRole.toUpperCase() } : card
       )
     );
   };
@@ -64,6 +87,7 @@ export default function RecruitRoleList({
             defaultRole={card.role}
             authorName={card.authorName}
             onRoleChange={(role) => handleChangeRole(card.id, role)}
+            onKick={() => handleKick(card.id)}
           />
         ))}
       </div>

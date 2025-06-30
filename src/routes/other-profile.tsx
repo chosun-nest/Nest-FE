@@ -10,6 +10,7 @@ import type { ProfileType } from "../types/profile";
 import { convertToProfileType } from "../utils/profileType";
 
 import Modal from "../components/common/modal";
+import SkeletonProfileCard from "../components/profile/card/SkeletonProfileCard";
 import ProfileCard from "../components/profile/card/ProfileCard";
 import { ModalContent } from "../types/modal";
 import {
@@ -111,20 +112,15 @@ export default function OtherProfile() {
 
       <GridContainer $isMobile={isMobile} $navbarHeight={navbarHeight}>
         <GridItem $isMobile={isMobile} $row="1" $col="1">
-          {loading ? (
-            <div className="w-80 h-[450px] p-4 border rounded-xl shadow-md bg-white flex items-center justify-center">
-              <p className="text-sm text-gray-500">🛜 불러오는 중...</p>
-            </div>
-          ) : profile ? (
-            <ProfileCard
-              profile={profile}
-              isOwnProfile={Number(id) === currentUserId} // ProfileCard로 isOwnProfile만 넘기면 내부에서 자동 처리됨
-            />
-          ) : (
-            <div className="p-4 text-red-500">
-              프로필을 불러오지 못했습니다.
-            </div>
-          )}
+          {loading || !profile ? (
+            <SkeletonProfileCard />   // 프로필 카드 UX 최적화, 깜빡임 제거
+            ) : (
+              <ProfileCard
+                profile={profile}
+                isOwnProfile={Number(id) === currentUserId} // ProfileCard로 isOwnProfile만 넘기면 내부에서 자동 처리됨
+              />
+            )
+          }
         </GridItem>
 
         {/* 1행: My Pins */}

@@ -9,7 +9,7 @@ export interface Comment {    // 댓글 항목 타입
   author: {
     id: number;
     name: string;
-    memberImageUrl?: string;  // 작성자 프로필 이미지 // 백엔드 추가 api 되었는지 확인
+    //memberImageUrl?: string;  // 작성자 프로필 이미지 > 백엔드 추가 불가능. Comment의 author.id와 ProfileAPI의 특정 회원 프로필 조회(GET) 사용하기 - memberImageUrl: string;
   };
   authorName: string;   // 작성자 이름
   createdAt: string;    // 작성일자

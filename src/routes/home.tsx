@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import * as S from "../assets/styles/home.styles";
 //import ProfileComponent from "../components/profile/card/ProfileCard";
-import ProfileCardWrapper from "../components/profile/card/ProfileCardWrapper";   // 프로필 카드 대신에 wrapper로 profile 컴포넌트 정보 불러옴.
+import ProfileCardWrapper from "../components/profile/card/ProfileCardWrapper"; // 프로필 카드 대신에 wrapper로 profile 컴포넌트 정보 불러옴.
 import useResponsive from "../hooks/responsive";
 import GuestCard from "../components/profile/card/ProfileCardGuest";
 import { useNavbarHeight } from "../context/NavbarHeightContext";
@@ -24,7 +24,7 @@ export default function Home() {
           <GuestCard />
         ) : (
           <S.ProfileContainer>
-              <ProfileCardWrapper />
+            <ProfileCardWrapper />
           </S.ProfileContainer>
         )}
       </S.GridItem>
@@ -42,7 +42,7 @@ export default function Home() {
       </S.GridItem>
       <S.GridItem $row="1" $rowSpan="2" $col="3" $isMobile={isMobile}>
         <S.ItemTitle>
-          학사 공지<Link to="/notice-board">+</Link>
+          공지사항 게시판<Link to="/notice-board">+</Link>
         </S.ItemTitle>
         <HomeNotice />
       </S.GridItem>

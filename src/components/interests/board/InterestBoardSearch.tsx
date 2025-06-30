@@ -9,20 +9,12 @@ export default function InterestBoardSearch({
   setSearchKeyword,
 }: InterestBoardSearchProps) {
   return (
-    <div className="flex justify-center mb-4">
-      <div className="flex w-full max-w-xl gap-2">
-        <input
-          type="text"
-          placeholder="게시글 제목을 검색해보세요"
-          value={searchKeyword}
-          onChange={(e) => setSearchKeyword(e.target.value)}
-          className="flex-grow px-3 py-2 border rounded"
-        />
-        <button className="px-5 py-2 text-white bg-[#002F6C] rounded">
-          검색
-        </button>
-      </div>
-    </div>
+    <input
+      type="text"
+      placeholder="제목 또는 내용 검색"
+      value={searchKeyword}
+      onChange={(e) => setSearchKeyword(e.target.value)}
+      className="px-3 py-2.5 text-sm border rounded w-full sm:w-[280px] h-[38px]"
+    />
   );
 }
-

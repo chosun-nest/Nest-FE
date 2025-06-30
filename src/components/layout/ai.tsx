@@ -48,15 +48,12 @@ export default function Ai() {
   async function handleFaqClick(faq: string) {
     setLoading(true);
     const userMessage: Chat = { role: "user", content: faq };
-    setMessages(prev => [...prev, userMessage]);
+    setMessages((prev) => [...prev, userMessage]);
     try {
       const answer = await fetchChatBotAnswer(faq);
-      setMessages(prev => [
-        ...prev,
-        { role: "assistant", content: answer },
-      ]);
+      setMessages((prev) => [...prev, { role: "assistant", content: answer }]);
     } catch {
-      setMessages(prev => [
+      setMessages((prev) => [
         ...prev,
         { role: "assistant", content: "오류가 발생했습니다." },
       ]);
@@ -69,16 +66,13 @@ export default function Ai() {
     if (!question.trim()) return;
     setLoading(true);
     const userMessage: Chat = { role: "user", content: question };
-    setMessages(prev => [...prev, userMessage]);
+    setMessages((prev) => [...prev, userMessage]);
     setQuestion("");
     try {
       const answer = await fetchChatBotAnswer(question);
-      setMessages(prev => [
-        ...prev,
-        { role: "assistant", content: answer },
-      ]);
+      setMessages((prev) => [...prev, { role: "assistant", content: answer }]);
     } catch {
-      setMessages(prev => [
+      setMessages((prev) => [
         ...prev,
         { role: "assistant", content: "오류가 발생했습니다." },
       ]);
@@ -108,12 +102,16 @@ export default function Ai() {
             className="flex-1 bg-blue-100 text-blue-800 py-2 rounded font-medium"
             onClick={() => setFooterStep("faq")}
             disabled={loading}
-          >FAQ 질문보기</button>
+          >
+            FAQ 질문보기
+          </button>
           <button
             className="flex-1 bg-gray-100 text-gray-700 py-2 rounded font-medium"
             onClick={() => setFooterStep("direct")}
             disabled={loading}
-          >직접 질문하기</button>
+          >
+            직접 질문하기
+          </button>
         </div>
       );
     }
@@ -126,8 +124,12 @@ export default function Ai() {
               onClick={() => setFooterStep("main")}
               disabled={loading}
               style={{ background: "none", border: "none" }}
-            >←</button>
-            <span className="font-semibold text-sm text-gray-700">FAQ를 선택해 주세요</span>
+            >
+              ←
+            </button>
+            <span className="font-semibold text-sm text-gray-700">
+              FAQ를 선택해 주세요
+            </span>
           </div>
           <div className="flex flex-wrap gap-1 mb-2">
             {FAQ_LIST.map((faq, idx) => (
@@ -136,14 +138,18 @@ export default function Ai() {
                 onClick={() => handleFaqClick(faq)}
                 disabled={loading}
                 className="flex-1 bg-blue-100 text-blue-800 py-1 px-2 rounded text-xs"
-              >{faq}</button>
+              >
+                {faq}
+              </button>
             ))}
           </div>
           <button
             className="bg-gray-100 text-gray-700 py-1 rounded font-medium"
             onClick={() => setFooterStep("direct")}
             disabled={loading}
-          >원하는 질문이 없어요 (직접 질문)</button>
+          >
+            원하는 질문이 없어요 (직접 질문)
+          </button>
         </div>
       );
     }
@@ -155,14 +161,18 @@ export default function Ai() {
             onClick={() => setFooterStep("main")}
             disabled={loading}
             style={{ background: "none", border: "none" }}
-          >←</button>
+          >
+            ←
+          </button>
           <input
             className="flex-grow px-3 py-2 text-sm shadow-sm rounded-md ring-gray-300 dark:ring-gray-700 ring-1 ring-inset disabled:cursor-not-allowed bg-white dark:bg-gray-800 text-black dark:text-white"
             placeholder="질문을 입력해주세요."
             onChange={handleQuestion}
             value={question}
             disabled={loading}
-            onKeyDown={e => { if (e.key === "Enter") postChatAPI(); }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") postChatAPI();
+            }}
           />
           <button
             className="w-20 bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm rounded-md disabled:bg-gray-300 dark:disabled:bg-gray-700 disabled:cursor-not-allowed"
@@ -198,7 +208,11 @@ export default function Ai() {
           <div style={{ display: "flex", alignItems: "center" }}>
             <span>
               궁금하신게 있으신가요?
-              <br />위닛에게 물어보세요! <span role="img" aria-label="smile">😊</span>
+              <br />
+              위닛에게 물어보세요!{" "}
+              <span role="img" aria-label="smile">
+                😊
+              </span>
             </span>
             <button
               onClick={() => setShowTooltip(false)}
@@ -220,7 +234,11 @@ export default function Ai() {
 
       {/* AI 도우미 버튼 */}
       <button
-        onClick={() => {  setIsOpen(prev => !prev); setFooterStep("main"); setShowTooltip(false); }}
+        onClick={() => {
+          setIsOpen((prev) => !prev);
+          setFooterStep("main");
+          setShowTooltip(false);
+        }}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
         className="fixed bottom-6 right-6 w-[50px] h-[50px] bg-blue-600 text-white rounded-full shadow-lg flex items-center justify-center hover:bg-blue-700 transition duration-300 z-50"
@@ -241,7 +259,6 @@ export default function Ai() {
             <h2 className="text-base font-semibold text-gray-800 dark:text-white">
               AI 도우미 위닛(WitN)
             </h2>
-            
           </div>
           {/* 채팅 히스토리 */}
           <div className="overflow-y-auto flex-grow pr-1 space-y-2 custom-scroll transition-all duration-300 ease-in-out">
@@ -256,6 +273,11 @@ export default function Ai() {
                   className="flex border-t border-gray-200 dark:border-gray-700 pt-3"
                 >
                   <p className="w-1/6 py-2 px-2 font-semibold text-sm text-gray-600 dark:text-gray-300">
+                    {displayName === "위닛" ? (
+                      <img src="/assets/images/ai.png" />
+                    ) : (
+                      <img src="/assets/images/chick.png" />
+                    )}
                     {displayName}
                   </p>
                   <div

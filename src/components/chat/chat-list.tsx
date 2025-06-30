@@ -36,7 +36,7 @@ export default function ChatList({ onSelectUser, chatRooms }: ChatListProps) {
       case "project":
         return "/project-room.png";
       case "dm":
-        return "/dm-chat.png";
+        return "/assets/images/user.png";
       default:
         return "/default-room.png";
     }

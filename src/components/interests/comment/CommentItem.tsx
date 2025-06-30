@@ -8,6 +8,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 
+import clsx from "clsx";
 import {
   deleteComment,
   updateComment,
@@ -32,6 +33,7 @@ interface CommentItemProps {
   boardType: BoardType;
   postId: number;
   onRefresh: () => void;
+  authorImageMap: Record<number, string>;
 }
 
 export default function CommentItem({
@@ -39,6 +41,7 @@ export default function CommentItem({
   boardType,
   postId,
   onRefresh,
+  authorImageMap,
 }: CommentItemProps) {
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -98,8 +101,8 @@ export default function CommentItem({
     return { mention: match[1], content: match[2] };
   };
 
-  const formatContent = (content: string) => {
-    const { mention, content: body } = extractMentionAndContent(content);
+  const formatContent = () => {
+    const { mention, content: body } = extractMentionAndContent(comment.content);
     return (
       <>
         {mention && <span className="font-semibold text-[#1E3A8A]">@{mention}</span>} {body}
@@ -108,7 +111,7 @@ export default function CommentItem({
   };
 
   return (
-<div className={`w-full ${isReply ? "bg-gray-50 border-l-2 border-blue-200" : ""}`}>
+<div className={clsx("w-full", isReply && "bg-gray-50 border-l-2 border-blue-200")}>
   <div className="py-2">
     <div className="flex items-start gap-2">
       
@@ -126,7 +129,7 @@ export default function CommentItem({
       <div className="flex items-start flex-1 gap-3">
         {/* 프로필 이미지 */}
         <img
-          src={comment.author.memberImageUrl || "/assets/images/user.png"}
+          src={ authorImageMap[comment.author.id] || "/assets/images/user.png"}  // comment.author.id 조회해서 profile.ts에 있는 MemberProfile 중 memberImageUrl 사용해야 할 것 같음.
           alt="작성자"
           className="object-cover w-10 h-10 rounded-full cursor-pointer"
           onClick={() =>
@@ -197,7 +200,7 @@ export default function CommentItem({
             ) : comment.isDeleted ? (
               <i className="text-gray-400">삭제된 댓글입니다.</i>
             ) : (
-              formatContent(comment.content)
+              formatContent()
             )}
           </div>
 
@@ -253,6 +256,7 @@ export default function CommentItem({
                   boardType={boardType}
                   postId={postId}
                   onRefresh={onRefresh}
+                  authorImageMap={authorImageMap}
                 />
               </motion.div>
             )}

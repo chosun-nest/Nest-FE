@@ -69,9 +69,8 @@ export default function EditProfileImage({
         <img
           src={profileImageToShow}
           alt="프로필"
-          className={`object-cover w-full h-full transition ${
-            isEditing ? "group-hover:opacity-80" : ""
-          }`}
+          className={`object-cover w-full h-full max-w-full max-h-full transition 
+            ${isEditing ? "group-hover:opacity-80" : ""}`}
         />
 
         <input

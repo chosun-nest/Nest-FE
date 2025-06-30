@@ -5,6 +5,7 @@ import Navbar from "../components/layout/navbar";
 import TagFilterModal from "../components/board/tag/TagFilterModal";
 import BoardTypeSelector from "../components/board/write/BoardTypeSelector";
 import BoardTagFilterButton from "../components/board/tag/BoardTagFilterButton";
+import SelectedTagList from "../components/board/tag/SelectedTagList";
 import TitleInput from "../components/board/write/TitleInput";
 import MarkdownEditor from "../components/board/write/MarkdownEditor";
 import SubmitButtons from "../components/board/write/SubmitButtons";
@@ -127,11 +128,16 @@ export default function InterestWrite() {
 
         <div className="mb-6">
           <BoardTagFilterButton
-            selectedTags={selectedTags}
-            onRemoveTag={(tag) => setSelectedTags((prev) => prev.filter((t) => t !== tag))}
             onOpenFilter={() => setShowFilterModal(true)}
           />
         </div>
+
+        <SelectedTagList
+          selectedTags={selectedTags}
+          onRemoveTag={(tag) =>
+            setSelectedTags((prev) => prev.filter((t) => t !== tag))
+          }
+        />
 
         {showFilterModal && (
           <TagFilterModal

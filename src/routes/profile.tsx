@@ -12,6 +12,7 @@ import {
 } from "../assets/styles/profile.styles"; // 프로필 grid 적용
 import { getMemberProfile } from "../api/profile/ProfileAPI";
 import { ProfileType } from "../types/profile";
+import SkeletonProfileCard from "../components/profile/card/SkeletonProfileCard";
 import ProfileCard from "../components/profile/card/ProfileCard";   // 프로필 카드 컴포넌트
 import { CaretDown, CaretUp } from "phosphor-react"; // history 열림, 닫힘용
 import useResponsive from "../hooks/responsive";
@@ -106,10 +107,8 @@ export default function Profile() {
         {/* 1행: 내 프로필 */}
         <GridItem $isMobile={isMobile} $row="1" $col="1">
           {loading || !profile ? (
-            <div className="relative p-4">
-              <p> 불러오는 중…</p>
-            </div>
-          ) : (
+            <SkeletonProfileCard />   // 프로필 카드 UX 최적화, 깜빡임 제거
+          )  : (
             <ProfileCard 
               profile={profile} 
               isOwnProfile={true}

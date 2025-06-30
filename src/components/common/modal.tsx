@@ -5,6 +5,7 @@ interface ModalProps {
   message: string;
   type?: "error" | "info";
   onClose?: () => void;
+  children?: React.ReactNode;     // 컴포넌트 내부에 JSX 콘텐츠(자식 요소)를 동적으로 넣을 수 있게 해주는 타입 선언
 }
 
 export default function Modal({

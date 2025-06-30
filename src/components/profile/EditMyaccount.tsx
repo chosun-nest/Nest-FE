@@ -4,8 +4,8 @@ import Withdraw from "./edit-myaccount/withdraw/withdraw";
 
 export default function EditMyAccount() {
   return (
-    <div className="max-w-2xl p-10 mx-auto bg-white shadow rounded-xl">
-      <h2 className="mb-4 text-xl font-bold text-blue-900">계정 관리</h2>
+    <div className="w-full max-w-2xl px-4 py-6 mx-auto bg-white shadow rounded-xl md:px-10 md:py-10">
+      <h2 className="mb-4 text-xl font-bold text-[#1e3a8a]">계정 관리</h2>
 
       {/* 비밀번호 변경하기 */}
       <AccountPassword />

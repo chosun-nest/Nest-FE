@@ -15,6 +15,18 @@ export interface ProjectSummary {
   isRecruiting: boolean;
 }
 
+export interface UpdateProjectPayload {
+  projectTitle: string;
+  projectDescription: string;
+  isRecruiting: boolean;
+  tags: string[];
+  partCounts?: {
+    [key: string]: number;
+  };
+  imageUrls?: string[] | null;
+  membersToRemove?: number[]; // ✅ 추방할 멤버 ID 리스트
+}
+
 export interface PageInfo {
   pageNumber: number;
   pageSize: number;
@@ -87,6 +99,7 @@ export interface UpdateProjectPayload {
     [key: string]: number;
   };
   imageUrls?: string[] | null;
+  membersToRemove?: number[];
 }
 
 // ✅ 프로젝트 삭제
@@ -99,7 +112,6 @@ export interface DeleteProjectResponse {
 export interface ProjectApplyRequest {
   projectId: number;
   part: "FRONTEND" | "BACKEND" | "PM" | "DESIGN" | "AI" | "ETC";
-  message: string;
 }
 
 export interface ProjectApplyResponse {
@@ -107,7 +119,7 @@ export interface ProjectApplyResponse {
   memberId: number;
   memberName: string;
   part: "FRONTEND" | "BACKEND" | "PM" | "DESIGN" | "AI" | "ETC";
-  status: "WAITING" | "ACCEPTED" | "REJECTED";
+  status: "WAITING" | "ACCEPTED" | "REJECTED" | "CANCELED";
   appliedAt: string;
 }
 

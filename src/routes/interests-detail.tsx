@@ -8,7 +8,7 @@ import {
 } from "../api/interests/InterestsAPI";
 import type { PostDetail } from "../types/api/interest-board";
 
-import { getMemberProfile } from "../api/profile/ProfileAPI";
+import { getMemberProfile, getMemberProfileById } from "../api/profile/ProfileAPI";
 import { useSelector, useDispatch } from "react-redux"; // 리덕스를 통해 사용자 구분 상태 관리
 import { setUser, selectCurrentUserId } from "../store/slices/userSlice"; // memberId, memberName, memberRole
 
@@ -39,6 +39,8 @@ export default function InterestsDetail() {
   const [showDeleteComplete, setShowDeleteComplete] = useState(false);
   const [notFound, setNotFound] = useState(false);
 
+  const [authorImageUrl, setAuthorImageUrl] = useState<string | null>(null);  // 사용자 이미지 상태 useState
+
   const memberId = useSelector(selectCurrentUserId);
   const isLoggedIn = memberId !== null;
 
@@ -52,7 +54,22 @@ export default function InterestsDetail() {
       })
     );
   });
-  }, []); // 의존성 배열 추가
+  }, [dispatch]); // 의존성 배열 추가
+
+  useEffect(() => {
+    if (!post) return;
+    const fetchAuthorImage = async () => {
+      try {
+        const profile = await getMemberProfileById(post.author.id);
+        setAuthorImageUrl(profile.memberImageUrl);    // 작성자 프로필 이미지 불러옴
+      } catch (error) {
+        console.warn("작성자 이미지 로딩 실패", error);
+        setAuthorImageUrl(null); // fallback
+      }
+    };
+
+    fetchAuthorImage();
+  }, [post]);
 
 
   // 네비게이션 바 높이 계산
@@ -163,7 +180,10 @@ export default function InterestsDetail() {
         {/* 작성자 정보 + 메뉴 */}
         <div className="flex items-start justify-between mb-6">
           <PostDetailInfo
-            author={post.author}
+            author={{
+              ...post.author,
+              profileImageUrl: authorImageUrl ?? undefined,
+            }}
             isAuthor={isAuthor}
             viewCount={post.viewCount}
             createdAt={post.createdAt}
@@ -206,10 +226,12 @@ export default function InterestsDetail() {
         <hr className="my-6 border-gray-200" />
 
         {/* 댓글 섹션 */}
-        <CommentSection
-          boardType="INTEREST"
-          postId={post.postId}
-        />
+        <div className="mt-8 p-6 bg-[#f9fafb] border rounded-sm border-gray-200 shadow-sm">
+          <CommentSection
+            boardType="INTEREST"
+            postId={post.postId}
+          />
+        </div>
       </div>
 
       {/* 삭제 확인 모달 */}

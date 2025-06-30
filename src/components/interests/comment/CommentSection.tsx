@@ -1,5 +1,5 @@
 // 1. 관심분야 정보 게시판 댓글 전체 랜더링 컨트롤 (댓글 최상위 컴포넌트)
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import { useDispatch } from "react-redux";
 import { showModal } from "../../../store/slices/modalSlice";
 import {
@@ -11,8 +11,14 @@ import { convertChildrenToReplies } from "../../../utils/comment";
 import CommentList from "./CommentList";
 import CommentForm from "./CommentForm";
 import SkeletonComment from "./SkeletonComment";
+import { useCommentAuthorProfiles } from "../../../hooks/useCommentAuthorProfiles";
 
-export default function CommentSection({ boardType, postId }: { boardType: BoardType; postId: number }) {
+interface Props{
+  boardType: BoardType;
+  postId: number;
+}
+
+export default function CommentSection({ boardType, postId }: Props) {
   const [comments, setComments] = useState<CommentWithReplies[]>([]);
   const [loading, setLoading] = useState(true);
   const dispatch = useDispatch();
@@ -79,6 +85,18 @@ export default function CommentSection({ boardType, postId }: { boardType: Board
     }
   };
 
+  // 모든 댓글, 대댓글 평탄화해서 작성자 목록 추출
+  const flattened = useMemo(() => {
+    const all: { author: { id: number } }[] = [];
+    for (const c of comments) {
+      all.push({ author: c.author });
+      for (const r of c.replies) all.push({ author: r.author });
+    }
+    return all;
+  }, [comments]);
+
+  const authorImageMap = useCommentAuthorProfiles(flattened);   // 단일 API 호출
+  
   return (
     <div className="w-full mt-10 overflow-x-hidden">
       <h3 className="mb-4 text-lg font-semibold">댓글</h3>
@@ -99,6 +117,7 @@ export default function CommentSection({ boardType, postId }: { boardType: Board
           postId={postId}
           boardType={boardType}
           onRefresh={loadComments}
+          authorImageMap={authorImageMap}
         />
       )}
     </div>

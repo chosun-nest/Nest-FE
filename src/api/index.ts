@@ -104,6 +104,7 @@ API.interceptors.response.use(
 
     // 403 처리
     if (status === 403 && !errorMessage) {
+      store.dispatch(clearTokens());
       store.dispatch(
         showModal({
           title: "접근 권한 오류",
@@ -111,6 +112,7 @@ API.interceptors.response.use(
           type: "error",
         })
       );
+      window.location.href = "/login";
     }
 
     return Promise.reject(error);
