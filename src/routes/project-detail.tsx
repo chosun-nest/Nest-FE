@@ -16,7 +16,7 @@ import PostDetailHeader from "../components/project/detail/PostDetailHeader";
 import PostDetailTags from "../components/project/detail/PostDetailTags";
 import FollowButton from "../components/project/detail/FollowButton";
 
-import type { ProjectDetail } from "../types/api/project-board";
+import type { ProjectDetail, ProjectMember } from "../types/api/project-board";
 
 export default function ProjectDetail() {
   const { id } = useParams();
@@ -27,6 +27,7 @@ export default function ProjectDetail() {
   const currentUserId = useSelector(selectCurrentUserId);
 
   const [project, setProject] = useState<ProjectDetail | null>(null);
+  const [participants, setParticipants] = useState<ProjectMember[]>([]);
   const [loading, setLoading] = useState(true);
   const [authError, setAuthError] = useState(false);
   const [notFound, setNotFound] = useState(false);
@@ -42,7 +43,7 @@ export default function ProjectDetail() {
         setLoading(false);
         return;
       }
-      
+
       try {
         const user = await getMemberProfile();
         dispatch(setUser({
@@ -53,6 +54,7 @@ export default function ProjectDetail() {
 
         const data = await getProjectById(Number(id));
         setProject(data);
+        setParticipants(data.projectMembers); // ✅ 초기 참여자 저장
       } catch (err: any) {
         if (err.response?.status === 404) {
           setNotFound(true);
@@ -67,11 +69,26 @@ export default function ProjectDetail() {
     initialize();
   }, [id, accessToken]);
 
+  const handleAccept = (newMember: {
+    id: number;
+    name: string;
+    role: "FRONTEND" | "BACKEND" | "PM" | "DESIGN" | "AI" | "ETC";
+    followers: number;
+  }) => {
+    const newEntry: ProjectMember = {
+      part: newMember.role,
+      role: "MEMBER",
+      memberId: newMember.id,
+      memberName: newMember.name,
+    };
+    setParticipants((prev) => [...prev, newEntry]);
+  };
+
   const handleEdit = () => {
     if (!project) return;
 
     const partCounts: Record<string, number> = {};
-    project.projectMembers.forEach((member) => {
+    participants.forEach((member) => {
       if (member.part) {
         partCounts[member.part] = (partCounts[member.part] || 0) + 1;
       }
@@ -151,7 +168,6 @@ export default function ProjectDetail() {
           {project.projectTitle}
         </h1>
 
-        {/* 작성자 정보 + 버튼 */}
         <div className="flex items-start justify-between mb-6">
           <PostDetailInfo
             author={{
@@ -177,20 +193,16 @@ export default function ProjectDetail() {
 
         <hr className="my-6 border-gray-200" />
 
-        {/* 내용 */}
         <div className="mb-6 leading-relaxed text-gray-700 whitespace-pre-line">
           {project.projectDescription}
         </div>
 
-        {/* 태그 */}
         <PostDetailTags tags={project.tags} />
 
-        {/* 댓글 */}
         <div className="px-5 py-4 mb-6 border rounded bg-gray-50">
           <CommentSection boardType="PROJECT" postId={project.projectId} />
         </div>
 
-        {/* 뒤로가기 */}
         <button
           onClick={() => navigate(-1)}
           className="px-4 py-2 text-sm text-white rounded bg-slate-800"
@@ -203,9 +215,9 @@ export default function ProjectDetail() {
       <div className="w-full lg:w-[280px] shrink-0">
         <ParticipantCardBox
           project={project}
-          participants={project.projectMembers} // ✅ 정확하게 연결됨
+          participants={participants} // ✅ 상태 반영
           onOpenModal={() => setIsModalOpen(true)}
-          onAccept={() => {}}
+          onAccept={handleAccept} // ✅ 수락된 멤버 반영
           currentUserId={currentUserId!}
         />
       </div>
@@ -214,11 +226,10 @@ export default function ProjectDetail() {
       {isModalOpen && (
         <ApplicationModal
           onClose={() => setIsModalOpen(false)}
-          onAccept={() => {}}
+          onAccept={handleAccept} // ✅ props 전달
         />
       )}
 
-      {/* 삭제 확인 모달 */}
       {showDeleteConfirm && (
         <ConfirmModal
           title="프로젝트 삭제"

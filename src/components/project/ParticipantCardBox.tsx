@@ -78,7 +78,7 @@ export default function ParticipantCardBox({
               <span className="text-xs font-semibold px-2 py-0.5 rounded-full text-green-800 bg-green-100 border border-green-300">
                 {role}
               </span>
-
+              
               {member && member.memberName ? (
                 <button
                   onClick={() => navigate(`/profile/${member.memberId}`)}
