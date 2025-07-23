@@ -26,11 +26,6 @@ export default function CommentSection({ boardType, postId }: Props) {
   const memberId = Number(localStorage.getItem("memberId"));
   const isLoggedIn = !Number.isNaN(memberId);
 
-  // 1. API 응답은 RawComment[]
-  // 2. RawComment는 children?: RawComment[]
-  // 3. 우리는 replies: CommentWithReplies[] 구조로 렌더링
-  // 4. 따라서 children 필드는 무시하고 parentId 기반으로 replies를 수동 생성
-
   const loadComments = useCallback(async () => {
     setLoading(true);
     try {
