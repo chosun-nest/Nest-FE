@@ -1,147 +1,192 @@
-import { useEffect, useRef, useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
-//import { useSelector } from "react-redux";
-//import { selectCurrentUserName } from "../store/slices/userSlice";
+// 프로젝트 등록 페이지(프로젝트 글쓰기 페이지)
+import { useState, useRef, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import StepSidebar from "../components/project/write/StepSidebar";
+import { StepContent } from "../components/project/write/StepContent";
+import StepFooter from "../components/project/write/StepFooter";
+import ProjectWriteComplete from "./project-write-complete";
 import Navbar from "../components/layout/navbar";
 import BoardTypeSelector from "../components/board/write/BoardTypeSelector";
-import TagFilterModal from "../components/board/tag/TagFilterModal";
-import SelectedTagList from "../components/board/tag/SelectedTagList";
-//import BoardTagFilterButton from "../components/board/tag/BoardTagFilterButton";
-import TitleInput from "../components/board/write/TitleInput";
-import MarkdownEditor from "../components/board/write/MarkdownEditor";
-import SubmitButtons from "../components/board/write/SubmitButtons";
+import { createProjectPost } from "../api/project/ProjectAPI";
 import Modal from "../components/common/modal";
 import { ModalContent } from "../types/modal";
-import { createProjectPost, updateProject } from "../api/project/ProjectAPI";
-import RecruitRoleList from "../components/project/RecruitRoleList";
-import { getMemberProfile } from "../api/profile/ProfileAPI";
-import type { ProjectDetail } from "../types/api/project-board";
 
-interface RecruitCardData {
-  id: number;
-  role: string;
-  authorName: string;
-}
+
+export type ProjectFormData = {
+  title: string;
+  category: string;
+  description: string;
+  deadline: string;
+  startDate: string;
+  endDate: string;
+  meetingType: "온라인" | "오프라인" | "혼합";
+  roles: { role: string; count: number }[];
+  myRole: string;
+  tags: string[];
+};
+
+const initialFormData: ProjectFormData = {
+  title: "",
+  category: "개발",
+  description: `[개발 프로젝트 모집 예시]
+- 프로젝트 주제: 
+- 프로젝트 목표: 
+- 예상 프로젝트 일정(횟수):`,
+  deadline: "",
+  startDate: "",
+  endDate: "",
+  meetingType: "온라인",
+  roles: [{ role: "FRONTEND", count: 1 }],
+  myRole: "LEADER",
+  tags: [],
+};
 
 export default function ProjectWrite() {
   const navigate = useNavigate();
-  const location = useLocation();
-  
-  //const reduxAuthorName = useSelector(selectCurrentUserName);
-
   const navbarRef = useRef<HTMLDivElement>(null);
 
-  const projectToEdit = location.state?.project as ProjectDetail | undefined;
-  const isEditMode = Boolean(projectToEdit);
-
   const [navHeight, setNavHeight] = useState(0);
-  const [finalAuthorName, setFinalAuthorName] = useState("모집중");
-  const [title, setTitle] = useState("");
-  const [content, setContent] = useState<string>("");
-  const [selectedTags, setSelectedTags] = useState<string[]>([]);
-  const [recruitCards, setRecruitCards] = useState<RecruitCardData[]>([]);
-  const [kickedMemberIds, setKickedMemberIds] = useState<number[]>([]);
-  const [showFilterModal, setShowFilterModal] = useState(false);
+  const [step, setStep] = useState(1);
+  const [formData, setFormData] = useState<ProjectFormData>(initialFormData);
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [showModal, setShowModal] = useState(false);
   const [modalContent, setModalContent] = useState<ModalContent>({
     title: "",
     message: "",
     type: "info",
   });
-
+  
   useEffect(() => {
     if (navbarRef.current) {
       setNavHeight(navbarRef.current.offsetHeight);
     }
   }, []);
 
-  useEffect(() => {
-    getMemberProfile()
-      .then((user) => {
-        setFinalAuthorName(user.memberName || "모집중");
-      })
-      .catch(() => setFinalAuthorName("모집중"));
-  }, []);
-
-  useEffect(() => {
-    if (isEditMode && projectToEdit) {
-      setTitle(projectToEdit.projectTitle);
-      setContent(projectToEdit.projectDescription);
-      setSelectedTags(projectToEdit.tags);
-    } else {
-      setContent(
-        `[개발 프로젝트 모집 예시]\n\n- 프로젝트 주제: \n- 프로젝트 목표: \n- 예상 프로젝트 일정(횟수):`
-      );
+    // 각 단계별 검증 로직 추가
+  const validateStep = (stepNumber: number): boolean => {
+  const newErrors: Record<string, string> = {};
+    switch (stepNumber) {
+      case 1:
+        if (!formData.title.trim()) {
+          newErrors.title = "프로젝트 제목을 입력해주세요.";
+        }
+        if (!formData.description.trim()) {
+          newErrors.description = "프로젝트 설명을 입력해주세요.";
+        }
+        // if (formData.tags.length === 0) {
+        //   newErrors.tags = "최소 1개 이상의 태그를 선택해주세요.";
+        // }
+        break;
+      case 2:
+        if (!formData.deadline) {
+          newErrors.deadline = "모집 마감일을 선택해주세요.";
+        }
+        if (!formData.startDate) {
+          newErrors.startDate = "프로젝트 시작일을 선택해주세요.";
+        }
+        if (!formData.endDate) {
+          newErrors.endDate = "프로젝트 종료일을 선택해주세요.";
+        }
+        // 날짜 순서 검증
+        if (formData.deadline && formData.startDate && formData.deadline >= formData.startDate) {
+          newErrors.dateOrder = "모집 마감일은 프로젝트 시작일보다 이전이어야 합니다.";
+        }
+        if (formData.startDate && formData.endDate && formData.startDate >= formData.endDate) {
+          newErrors.dateOrder = "프로젝트 시작일은 종료일보다 이전이어야 합니다.";
+        }
+        break;
+      case 3:
+        if (!formData.roles[0]?.role.trim()) {
+          newErrors.role = "필요한 역할을 입력해주세요.";
+        }
+        if (!formData.roles[0]?.count || formData.roles[0].count < 1) {
+          newErrors.count = "최소 1명 이상 모집해야 합니다.";
+        }
+        if (!formData.myRole) {
+          newErrors.myRole = "본인의 역할을 선택해주세요.";
+        }
+        break;
     }
-  }, [isEditMode, projectToEdit]);
-
-  const handleKickMember = (id: number) => {
-    setKickedMemberIds((prev) => (prev.includes(id) ? prev : [...prev, id]));
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = async () => {
-    if (!title || !content) {
-      setModalContent({
-        title: "입력 누락",
-        message: "제목과 내용을 입력해주세요.",
-        type: "error",
-      });
-      setShowModal(true);
-      return;
+  const goNext = () => {
+    if (validateStep(step)) {
+    setStep((prev) => Math.min(prev + 1, 4));
+    setErrors({});  // 에러로 인한 스텝 이동 방지 해제
     }
+  };
+  const goPrev = () => {
+    setStep((prev) => Math.max(prev - 1, 1));
+    setErrors({}); // 에러 초기화
+  };
+  // const goToBoard = () => setStep(4);
 
-    const partCounts = recruitCards.reduce(
-      (acc, { role }) => {
-        acc[role] = (acc[role] || 0) + 1;
-        return acc;
-      },
-      {} as Record<string, number>
-    );
+  // const updateForm = (newData: Partial<ProjectFormData>) => {
+  //   setFormData((prev) => ({ ...prev, ...newData }));
+  // };
 
-    const payload = {
-      projectTitle: title,
-      projectDescription: content,
-      isRecruiting: true,
-      tags: selectedTags,
-      partCounts,
-      ...(isEditMode && { membersToRemove: kickedMemberIds }), // ✅ 추방할 멤버 포함
-    };
+  // API 연동
+  const handleSubmit = async () => {
+    if (!validateStep(3)) return;
 
     try {
-      if (isEditMode && projectToEdit) {
-        await updateProject(projectToEdit.projectId, payload);
-        setModalContent({
-          title: "수정 완료",
-          message: "게시글이 성공적으로 수정되었습니다.",
-          type: "info",
-          onClose: () => navigate(`/project/${projectToEdit.projectId}`),
-        });
-      } else {
-        await createProjectPost({
-          ...payload,
-          creatorPart: recruitCards[0]?.role || "BACKEND",
-          creatorRole: "LEADER",
-          maximumNumberOfMembers: Object.values(partCounts).reduce(
-            (sum, c) => sum + c,
-            0
-          ),
-        });
-        setModalContent({
-          title: "게시 완료",
-          message: "게시글이 등록되었습니다. 프로젝트 게시판에서 확인하세요.",
-          type: "info",
-          onClose: () => navigate("/project-board"),
-        });
-      }
-      setShowModal(true);
-    } catch (e) {
-      console.error(e);
+      // API 페이로드 생성
+      const payload = {
+        projectTitle: formData.title,
+        projectDescription: formData.description,
+        isRecruiting: true,
+        tags: formData.tags,
+        partCounts: {
+          [formData.roles[0].role]: formData.roles[0].count
+        },
+        creatorPart: formData.myRole,
+        creatorRole: "LEADER",
+        // 추가로 필요한 필드들 (API 스펙에 따라 조정하기)
+        maximumNumberOfMembers: formData.roles[0].count,
+        deadline: formData.deadline,
+        startDate: formData.startDate,
+        endDate: formData.endDate,
+        meetingType: formData.meetingType,
+      };
+
+      await createProjectPost(payload); // 프로젝트 모집글 생성 API 호출
+      setStep(4); // 완료 페이지로 이동
+    } catch (error) {
+      console.error("프로젝트 등록 실패:", error);
       setModalContent({
         title: "등록 실패",
-        message: "게시글 등록에 실패했습니다.",
+        message: "프로젝트 등록에 실패했습니다. 다시 시도해주세요.",
         type: "error",
       });
       setShowModal(true);
+    }
+  };
+
+  const handleCancel = () => {
+    setModalContent({
+      title: "작성 취소",
+      message: "작성을 취소하시겠습니까? 작성된 내용이 모두 사라집니다.",
+      type: "info",
+      onClose: () => {
+        setShowModal(false);
+        navigate("/project-board");
+      },
+    });
+    setShowModal(true);
+  };
+
+  const updateForm = (newData: Partial<ProjectFormData>) => {
+    setFormData((prev) => ({ ...prev, ...newData }));
+    // 데이터 변경 시 해당 필드의 에러 제거
+    if (errors) {
+      const newErrors = { ...errors };
+      Object.keys(newData).forEach(key => {
+        delete newErrors[key];
+      });
+      setErrors(newErrors);
     }
   };
 
@@ -149,78 +194,66 @@ export default function ProjectWrite() {
     <>
       <Navbar ref={navbarRef} />
       <div
-        className="max-w-6xl mx-auto px-4 mt-[40px]"
-        style={{ paddingTop: navHeight }}
+        className="max-w-5xl mx-auto px-4 pt-6 pb-10"
+        style={{ paddingTop: navHeight + 24 }}
       >
+        {/* 상단 바 */}
+        <div className="flex justify-between items-center mb-6">
+          <button
+            onClick={() => navigate("/project-board")}
+            className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-700 transition-colors"
+          >
+            ⬅ 프로젝트 게시판으로 이동
+          </button>
+        </div>
+      
+        {/* 게시판 선택 드롭 다운 제목 */}
         <BoardTypeSelector boardType="projects" />
-        <div className="flex flex-col gap-8 md:flex-row">
+
+        {/* 안내 메시지 */}
+        <div className="p-3 mb-6 text-sm border-l-4 border-blue-600 rounded bg-blue-50">
+          <strong>프로젝트 모집 예시를 참고해 작성해주세요.</strong>
+          <br />
+          꼼꼼히 작성하면 멋진 프로젝트 팀원을 만날 수 있을 거예요.
+        </div>
+
+        {/* 본문 */}
+        <div className="flex flex-col md:flex-row gap-8">
+          <StepSidebar currentStep={step} />
           <div className="flex-1">
-            <div className="p-3 mb-4 text-sm border-l-4 border-blue-600 rounded bg-blue-50">
-              <strong>프로젝트 모집 예시를 참고해 작성해주세요.</strong>
-              <br />
-              꼼꼼히 작성하면 멋진 프로젝트 팀원을 만날 수 있을 거예요.
-            </div>
-            <TitleInput
-              title={title}
-              setTitle={setTitle}
-              boardType="projects"
-            />
-            <MarkdownEditor content={content} setContent={setContent} />
-
-            {/* 태그 리스트 표시 */}
-            <SelectedTagList
-              selectedTags={selectedTags}
-              onRemoveTag={(tag) => setSelectedTags((prev) => prev.filter((t) => t !== tag))}
-            />
-
-            {/* 태그 필터 모달 열기 버튼 */}
-            <div className="mt-2">
-              <button
-                onClick={() => setShowFilterModal(true)}
-                className="px-3 py-2 text-sm text-gray-700 bg-gray-100 border rounded hover:bg-gray-200"
-              >
-                🔍 태그 선택
-              </button>
-            </div>
-
-            {showFilterModal && (
-              <TagFilterModal
-                onClose={() => setShowFilterModal(false)}
-                onApply={(tags) => {
-                  setSelectedTags(tags);
-                  setShowFilterModal(false);
-                }}
-              />
+            {step === 4 ? (
+              <ProjectWriteComplete />
+            ) : (
+              <>
+                <StepContent
+                  currentStep={step}
+                  formData={formData}
+                  updateForm={updateForm}
+                  errors={errors}
+                />
+                <StepFooter
+                step={step}
+                totalSteps={3}
+                onPrev={goPrev}
+                onNext={goNext}
+                onCancel={handleCancel}
+                onComplete={handleSubmit}
+                />
+              </>
             )}
-            {showModal && (
-              <Modal
-                {...modalContent}
-                onClose={() => {
-                  setShowModal(false);
-                  modalContent.onClose?.();
-                }}
-              />
-            )}
-            <SubmitButtons
-              onCancel={() => navigate(-1)}
-              onSubmit={handleSubmit}
-              submitLabel={isEditMode ? "수정 완료" : undefined}
-            />
-          </div>
-          <div className="w-full md:w-[300px]">
-            <RecruitRoleList
-              onChange={setRecruitCards}
-              authorName={finalAuthorName}
-              defaultMembers={projectToEdit?.projectMembers?.map((member) => ({
-                memberName: member.memberName ?? "",
-                part: member.part,
-                memberId: member.memberId,
-              }))}
-              onKickMember={handleKickMember}
-            />
           </div>
         </div>
       </div>
+
+      {showModal && (
+        <Modal
+          {...modalContent}
+          onClose={() => {
+            setShowModal(false);
+            modalContent.onClose?.();
+          }}
+        />
+      )}
     </>
   );
 }

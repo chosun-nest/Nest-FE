@@ -10,7 +10,11 @@ import {
   ProjectApplyResponse,
 } from "../../types/api/project-board";
 
-// ✅ 프로젝트 게시글 생성
+// =========================================
+// [프로젝트 모집 등록용 - project-write.tsx]
+// =========================================
+
+// 프로젝트 모집글 생성 (POST) - 인증 필요
 export const createProjectPost = async (
   payload: CreateProjectPayload
 ): Promise<CreateProjectPostResponse> => {
@@ -18,7 +22,35 @@ export const createProjectPost = async (
   return response.data;
 };
 
-// ✅ 프로젝트 목록 조회 (쿼리 파라미터: page, size, sort, tags)
+// 프로젝트 임시저장 (초안 저장) -> 추가 예정
+export const saveDraftProject = async (payload: Partial<CreateProjectPayload>) => {
+  const response = await API.post("/api/v1/projects/draft", payload);
+  return response.data;
+};
+
+// 임시저장된 프로젝트 목록 조회 -> 추가 예정
+export const getDraftProjects = async () => {
+  const response = await API.get("/api/v1/projects/drafts");
+  return response.data;
+};
+
+// 임시저장된 프로젝트 불러오기 -> 추가 예정
+export const getDraftProject = async (draftId: number) => {
+  const response = await API.get(`/api/v1/projects/drafts/${draftId}`);
+  return response.data;
+};
+
+// 임시저장 삭제 -> 추가 예정
+export const deleteDraftProject = async (draftId: number) => {
+  const response = await API.delete(`/api/v1/projects/drafts/${draftId}`);
+  return response.data;
+};
+
+// =========================================
+// [프로젝트 게시판용 - project-board.tsx]
+// =========================================
+
+// 프로젝트 목록 조회 (쿼리 파라미터: page, size, sort, tags) (GET) - 인증 불필요
 export const getProjects = async (params: {
   page: number;
   size: number;
@@ -46,7 +78,7 @@ export const getProjects = async (params: {
   return response.data;
 };
 
-// ✅ 프로젝트 검색
+// 게시글 검색(GET) - 인증 불필요
 export const searchProjects = async (params: {
   keyword: string;
   searchType?: "ALL" | "TITLE" | "CONTENT";
@@ -76,7 +108,11 @@ export const searchProjects = async (params: {
   return response.data;
 };
 
-// ✅ 프로젝트 상세 조회
+// =========================================
+// [프로젝트 모집 게시글 상세용 - project-detail.tsx]
+// =========================================
+
+// 프로젝트 상세 조회 (GET) - 인증 불필요
 export const getProjectById = async (
   projectId: number
 ): Promise<ProjectDetail> => {
@@ -84,7 +120,15 @@ export const getProjectById = async (
   return response.data;
 };
 
-// ✅ 프로젝트 수정
+// 프로젝트 삭제 (DELETE) - 인증 필요
+export const deleteProject = async (
+  projectId: number
+): Promise<DeleteProjectResponse> => {
+  const response = await API.delete(`/api/v1/projects/${projectId}`);
+  return response.data;
+};
+
+// 프로젝트 수정 (PATCH) - 인증 필요
 export const updateProject = async (
   projectId: number,
   payload: UpdateProjectPayload
@@ -92,13 +136,18 @@ export const updateProject = async (
   await API.patch(`/api/v1/projects/${projectId}`, payload);
 };
 
-// ✅ 프로젝트 삭제
-export const deleteProject = async (
-  projectId: number
-): Promise<DeleteProjectResponse> => {
-  const response = await API.delete(`/api/v1/projects/${projectId}`);
+// 프로젝트 상태 변경 (진행중/완료/취소) -> 추가 예정
+export const updateProjectStatus = async (
+  projectId: number, 
+  status: 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED'
+) => {
+  const response = await API.patch(`/api/v1/projects/${projectId}/status`, { status });
   return response.data;
 };
+
+// =========================================
+// [지원/지원자 관리용]
+// =========================================
 
 // ✅ 프로젝트 모집글에 지원
 export const applyToProject = async (payload: ProjectApplyRequest) => {
@@ -112,7 +161,7 @@ export const applyToProject = async (payload: ProjectApplyRequest) => {
   return response.data;
 };
 
-// ✅ [이름 변경] 지원자 목록 조회 (Swagger 구조에 맞춤)
+// ✅ [이름 변경] 지원자 목록 조회
 export const getApplicantsByProjectId = async (
   projectId: number
 ): Promise<ProjectApplyResponse[]> => {
@@ -133,3 +182,29 @@ export const updateApplicationStatus = async (
     { headers: { skipAuth: false } }
   );
 };
+
+// =========================================
+// [공통/기타]
+// =========================================
+
+// 기술 스택 목록 조회 (GET)
+export const getTech = async () => {
+  const res = await API.get("/api/v1/tech-stacks", {
+    headers: { skipAuth: true },
+  });
+  return res.data;
+};
+
+// 프로젝트 신고 -> 추가 예정
+// export const reportProject = async (
+//   projectId: number,
+//   reason: string,
+//   description?: string
+// ) => {
+//   const response = await API.post(`/api/v1/projects/${projectId}/report`, {
+//     reason,
+//     description
+//   });
+//   return response.data;
+// };
+

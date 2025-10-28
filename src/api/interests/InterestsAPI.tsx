@@ -24,7 +24,7 @@ const authHeader = () => ({
 });
 
 // =========================================
-// [관심분야 게시판 글쓰기용 - board-write.tsx]
+// [관심분야 게시판 글쓰기용 - interests-write.tsx]
 // =========================================
 
 // 관심분야 게시글 작성 (POST) - 인증 필요
@@ -37,41 +37,6 @@ export const createInterestPost = async (
     authHeader()
   );
   return response.data;
-};
-
-// =========================================
-// [관심분야 게시글 상세 페이지용 - interests-detail.tsx]
-// =========================================
-
-// 게시글 상세 조회 (GET) - 인증 필요
-export const fetchPostDetail = async (postId: number): Promise<PostDetail> => {
-  const response = await API.get<PostDetail>(
-    `/api/v1/posts/${postId}`,
-    authHeader()
-  );
-  return response.data;
-};
-
-// 게시글 삭제 (DELETE) - 인증 필요
-export const deletePost = async (postId: number): Promise<DeletePostResponse> => {
-  const response = await API.delete<DeletePostResponse>(
-    `/api/v1/posts/${postId}`,
-    authHeader()
-  );
-  return response.data;
-};
-
-// 게시글 수정 요청 (PATCH) - 인증 필요
-export const updatePost = async (
-  postId: number,
-  payload: UpdatePostRequest
-): Promise<UpdatePostResponse> => {
-  const response = await API.patch<UpdatePostResponse>(
-    `/api/v1/posts/${postId}`,
-    payload,
-    authHeader()
-  );
-  return response.data; // postId, message
 };
 
 // =========================================
@@ -117,7 +82,6 @@ export const reactToPost = async (
   return response.data;
 };
 
-// =========================================
 // 게시글 검색 (GET) - 인증 불필요
 export const searchPosts = async (
   params: SearchPostsParams
@@ -144,4 +108,39 @@ export const searchPosts = async (
     }
   );
   return response.data;
+};
+
+// =========================================
+// [관심분야 게시글 상세 페이지용 - interests-detail.tsx]
+// =========================================
+
+// 게시글 상세 조회 (GET) - 인증 필요
+export const fetchPostDetail = async (postId: number): Promise<PostDetail> => {
+  const response = await API.get<PostDetail>(
+    `/api/v1/posts/${postId}`,
+    authHeader()
+  );
+  return response.data;
+};
+
+// 게시글 삭제 (DELETE) - 인증 필요
+export const deletePost = async (postId: number): Promise<DeletePostResponse> => {
+  const response = await API.delete<DeletePostResponse>(
+    `/api/v1/posts/${postId}`,
+    authHeader()
+  );
+  return response.data;
+};
+
+// 게시글 수정 요청 (PATCH) - 인증 필요
+export const updatePost = async (
+  postId: number,
+  payload: UpdatePostRequest
+): Promise<UpdatePostResponse> => {
+  const response = await API.patch<UpdatePostResponse>(
+    `/api/v1/posts/${postId}`,
+    payload,
+    authHeader()
+  );
+  return response.data; // postId, message
 };
