@@ -99,14 +99,17 @@ function Navbar(_: unknown, ref: ForwardedRef<HTMLDivElement>) {
           <S.NavCenter>
             {!isMobile ? (
               <>
-                <S.NavbarLink to="/interests-board">
-                  <S.WebBarItem>관심분야 게시판</S.WebBarItem>
-                </S.NavbarLink>
                 <S.NavbarLink to="/notice-board">
                   <S.WebBarItem>공지사항 게시판</S.WebBarItem>
                 </S.NavbarLink>
                 <S.NavbarLink to="/project-board">
                   <S.WebBarItem>프로젝트 모집 게시판</S.WebBarItem>
+                </S.NavbarLink>
+                <S.NavbarLink to="/interests-board">
+                  <S.WebBarItem>관심분야 게시판</S.WebBarItem>
+                </S.NavbarLink>
+                <S.NavbarLink to="/lecture-board">
+                  <S.WebBarItem>강의평가 게시판</S.WebBarItem>
                 </S.NavbarLink>
                 <S.NavbarLink to="/chat">
                   <S.WebBarItem>채팅방</S.WebBarItem>

@@ -17,10 +17,14 @@ import ProjectBoard from "./routes/project-board"; //yu-gyeom
 import ProjectDetail from "./routes/project-detail"; //yu-gyeom
 import ProjectApply from "./routes/project-apply"; // yu-gyeom
 import NoticeBoard from "./routes/NoticeBoard"; //hye-rin
-import InterestsBorad from "./routes/interests-borad"; //yeong-eun
+import InterestsBorad from "./routes/interests-board"; //yeong-eun
 import InterestsDetail from "./routes/interests-detail"; //yeong-eun
 import InterestWrite from "./routes/interests-write"; //yeong-eun
 import ProjectWrite from "./routes/project-write"; //yeong-eun
+
+import LectureBoard from "./routes/lecture-board"; //yeong-eun
+import LectureDetail from "./routes/lecture-detail"; //yeong-eun
+import LectureWrite from "./routes/lecture-write"; //yeong-eun
 
 import GlobalBackdrop from "./components/easter/GlobalBackdrop";
 import { BackdropContext } from "./context/Backdropcontext";
@@ -68,28 +72,53 @@ const router = createBrowserRouter([
       {
         path: "project-apply/:id", // ✅ 올바른 라우트 유지됨
         element: (
-          <ProtectedRoute>
+          //<ProtectedRoute>
             <ProjectApply />
-          </ProtectedRoute>
+          //</ProtectedRoute>
         ),
       },
       {
         path: "interests-write",
         element: (
-          <ProtectedRoute>
+          //<ProtectedRoute>
             <InterestWrite />
-          </ProtectedRoute>
+          //</ProtectedRoute>
         ),
       },
       { path: "project-board/", element: <ProjectBoard /> },
       {
         path: "project-write",
         element: (
-          <ProtectedRoute>
+          //<ProtectedRoute>
             <ProjectWrite />
+          //</ProtectedRoute>
+        ),
+      },
+      {
+        path: "lecture-board",
+        element: (
+          <ProtectedRoute>
+            <LectureBoard />
           </ProtectedRoute>
         ),
       },
+      {
+        path: "lecture-detail",
+        element: (
+          <ProtectedRoute>
+            <LectureDetail />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "lecture-write",
+        element: (
+          <ProtectedRoute>
+            <LectureWrite />
+          </ProtectedRoute>
+        ),
+      },      
+
     ],
   },
   {
