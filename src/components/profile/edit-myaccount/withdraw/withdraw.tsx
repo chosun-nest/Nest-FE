@@ -1,4 +1,4 @@
-// 계정 탈퇴
+// 탈퇴하기 주 컴포넌트
 import {useState} from "react";
 import { useDispatch } from "react-redux";
 import { withdrawMember } from "../../../../api/profile/ProfileAPI";

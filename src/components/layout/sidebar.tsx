@@ -7,7 +7,7 @@ import {
   MdOutlineInterests,
   MdEventAvailable,
   MdChatBubbleOutline,
-  MdStarBorder,
+  MdPeople,
 } from "react-icons/md";
 import { useDispatch, useSelector } from "react-redux";
 import { clearTokens, selectAccessToken } from "../../store/slices/authSlice";
@@ -124,7 +124,7 @@ export default function Sidebar({ onClose }: SidebarProps) {
           </Link>
           <Link to="/lecture-board" onClick={handleClose}>
             <S.MenuItem>
-              <MdStarBorder /> 강의평가 게시판
+              <MdPeople /> 매칭 서비스
             </S.MenuItem>
           </Link>
           <Link to="/chat" onClick={handleClose}>

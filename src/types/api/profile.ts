@@ -53,6 +53,7 @@ export interface UpdateMemberProfilePayload {
   memberSnsUrl3?: string;
   memberSnsUrl4?: string;
   memberDepartmentUpdateRequestIdList?: number[];
+  memberInterestUpdateRequestIdList?: number[];
   memberTechStackUpdateRequestIdList?: number[];
 }
 

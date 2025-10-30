@@ -1,3 +1,4 @@
+//내 프로필 변경 메인 컴포넌트
 import React, { useState, useEffect, useRef } from "react";
 import {
   getMemberProfile,
@@ -206,6 +207,7 @@ export default function EditMyProfile() {
         memberSnsUrl2: sns2,
         memberSnsUrl3: sns3,
         memberDepartmentUpdateRequestIdList: departmentId ? [departmentId] : [],
+        memberInterestUpdateRequestIdList: [],
         memberTechStackUpdateRequestIdList: techStackIdList,
       });
 

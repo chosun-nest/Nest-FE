@@ -22,9 +22,7 @@ import InterestsDetail from "./routes/interests-detail"; //yeong-eun
 import InterestWrite from "./routes/interests-write"; //yeong-eun
 import ProjectWrite from "./routes/project-write"; //yeong-eun
 
-import LectureBoard from "./routes/lecture-board"; //yeong-eun
-import LectureDetail from "./routes/lecture-detail"; //yeong-eun
-import LectureWrite from "./routes/lecture-write"; //yeong-eun
+import MatchingBoard from "./routes/matching-board"; //yeong-eun
 
 import GlobalBackdrop from "./components/easter/GlobalBackdrop";
 import { BackdropContext } from "./context/Backdropcontext";
@@ -72,53 +70,36 @@ const router = createBrowserRouter([
       {
         path: "project-apply/:id", // ✅ 올바른 라우트 유지됨
         element: (
-          //<ProtectedRoute>
+          <ProtectedRoute>
             <ProjectApply />
-          //</ProtectedRoute>
+          </ProtectedRoute>
         ),
       },
       {
         path: "interests-write",
         element: (
-          //<ProtectedRoute>
+          <ProtectedRoute>
             <InterestWrite />
-          //</ProtectedRoute>
+          </ProtectedRoute>
         ),
       },
       { path: "project-board/", element: <ProjectBoard /> },
       {
         path: "project-write",
         element: (
-          //<ProtectedRoute>
+          <ProtectedRoute>
             <ProjectWrite />
-          //</ProtectedRoute>
+          </ProtectedRoute>
         ),
       },
       {
         path: "lecture-board",
         element: (
           <ProtectedRoute>
-            <LectureBoard />
+            <MatchingBoard />
           </ProtectedRoute>
         ),
       },
-      {
-        path: "lecture-detail",
-        element: (
-          <ProtectedRoute>
-            <LectureDetail />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: "lecture-write",
-        element: (
-          <ProtectedRoute>
-            <LectureWrite />
-          </ProtectedRoute>
-        ),
-      },      
-
     ],
   },
   {

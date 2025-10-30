@@ -109,7 +109,7 @@ function Navbar(_: unknown, ref: ForwardedRef<HTMLDivElement>) {
                   <S.WebBarItem>관심분야 게시판</S.WebBarItem>
                 </S.NavbarLink>
                 <S.NavbarLink to="/lecture-board">
-                  <S.WebBarItem>강의평가 게시판</S.WebBarItem>
+                  <S.WebBarItem>매칭 서비스</S.WebBarItem>
                 </S.NavbarLink>
                 <S.NavbarLink to="/chat">
                   <S.WebBarItem>채팅방</S.WebBarItem>
