@@ -5,11 +5,6 @@ import {
   getTagsByCategory,
   type Tag,
 } from "../../../api/board-common/TagListAPI";
-import {
-  getFavoriteTags,
-  addFavoriteTag,
-  removeFavoriteTag,
-} from "../../../api/board-common/UserTagAPI";
 import { useDebounce } from "../../../hooks/useDebounce"; // npm install lodash
 
 interface TagFilterModalProps {
@@ -25,32 +20,17 @@ export default function TagFilterModal({
   const debouncedSearch = useDebounce(search, 300); // 300ms 디바운스
   const [allTags, setAllTags] = useState<Tag[]>([]);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
-  const [initialTags, setInitialTags] = useState<string[]>([]); // 초기 즐겨찾기 태그 저장
   const [errorMessage, setErrorMessage] = useState("");
   const [filteredTags, setFilteredTags] = useState<Tag[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  // 전체 태그 및 즐겨찾기 태그 불러오기
+  // 전체 태그 불러오기 (게시판용 - 로컬 상태만 사용)
   useEffect(() => {
     (async () => {
       try {
         setIsLoading(true);
-        const [tagsRes, favoritesRes] = await Promise.allSettled([
-          getAllTags(),
-          getFavoriteTags(),
-        ]);
-
-        if (tagsRes.status === "fulfilled") {
-          setAllTags(tagsRes.value.tags);
-        }
-
-        if (favoritesRes.status === "fulfilled") {
-          const favoriteTagNames = favoritesRes.value.favoriteTags.map(
-            (tag) => tag.tagName
-          );
-          setSelectedTags(favoriteTagNames);
-          setInitialTags(favoriteTagNames);
-        }
+        const tagsRes = await getAllTags();
+        setAllTags(tagsRes.tags);
       } catch (e) {
         console.error("태그 목록 불러오기 실패", e);
       } finally {
@@ -254,36 +234,13 @@ export default function TagFilterModal({
             ⟳ 초기화
           </button>
           <button
-            className="w-full px-4 py-3 ml-2 text-white bg-[#002F6C] rounded hover:bg-[#001f4d] disabled:opacity-50 disabled:cursor-not-allowed"
-            onClick={async () => {
-              try {
-                setIsLoading(true);
-
-                // 변경사항 계산
-                const tagsToAdd = selectedTags.filter(
-                  (tag) => !initialTags.includes(tag)
-                );
-                const tagsToRemove = initialTags.filter(
-                  (tag) => !selectedTags.includes(tag)
-                );
-
-                // 서버에 변경사항 저장
-                await Promise.all([
-                  ...tagsToAdd.map((tag) => addFavoriteTag(tag)),
-                  ...tagsToRemove.map((tag) => removeFavoriteTag(tag)),
-                ]);
-
-                onApply(selectedTags);
-              } catch (e) {
-                console.error("즐겨찾기 태그 저장 실패", e);
-                alert("태그 저장에 실패했습니다. 다시 시도해주세요.");
-              } finally {
-                setIsLoading(false);
-              }
+            className="w-full px-4 py-3 ml-2 text-white bg-[#002F6C] rounded hover:bg-[#001f4d]"
+            onClick={() => {
+              // 게시판 필터링용이므로 서버 저장 없이 로컬 상태만 적용
+              onApply(selectedTags);
             }}
-            disabled={isLoading}
           >
-            {isLoading ? "저장 중..." : "적용"}
+            적용
           </button>
         </div>
       </div>
