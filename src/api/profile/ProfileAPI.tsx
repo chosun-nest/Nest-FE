@@ -100,6 +100,14 @@ export const getDepartments = async () => {
   return res.data;
 };
 
+// 관심분야 전체 조회 (GET)
+export const getInterests = async () => {
+  const res = await API.get("/api/v1/interests", {
+    headers: { skipAuth: true },
+  });
+  return res.data;
+};
+
 //
 // 관심 태그 관련 API
 //

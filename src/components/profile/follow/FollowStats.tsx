@@ -25,10 +25,11 @@ export default function FollowStats({
 
   return (
     <>
-      <div className="flex gap-6 mt-3 text-sm font-medium text-gray-700">
+      <div className="flex items-center mt-3 text-sm font-medium text-gray-700">
         <button onClick={() => setOpenTab("follower")}>
           팔로워 <span className="ml-1 text-blue-800">{followerCount}</span>
         </button>
+        <span className="mx-1 text-gray-400">|</span>
         <button onClick={() => setOpenTab("following")}>
           팔로잉 <span className="ml-1 text-blue-800">{followingCount}</span>
         </button>

@@ -1,4 +1,4 @@
-// 프로필 api 타입
+// 백엔트와 통신 api용 - 프로필 api 타입 정의
 
 // 회원 정보 전체
 export interface MemberProfile {
@@ -15,6 +15,7 @@ export interface MemberProfile {
   memberImageUrl: string;
   memberPasswordLength: number;
   memberDepartmentResponseDtoList: MemberDepartment[];
+  memberInterestResponseDtoList: MemberInterest[];
   memberTechStackResponseDtoList: MemberTechStack[];
 }
 
@@ -69,6 +70,12 @@ export interface UpdateMemberPasswordPayload {
   newPasswordConfirm?: string;
 }
 
+// 관심분야 목록 조회 응답 (GET /api/v1/interests)
+export interface InterestResponse {
+  interestId: number;
+  interestName: string;
+}
+
 // 특정 회원 프로필 조회 - 로그인 필요(GET)
 export interface MemberProfile {
   memberId: number;
@@ -84,6 +91,6 @@ export interface MemberProfile {
   memberImageUrl: string;
   memberPasswordLength: number;
   memberDepartmentResponseDtoList: MemberDepartment[];
-  memberTechStackResponseDtoList: MemberTechStack[];
   memberInterestResponseDtoList: MemberInterest[];
+  memberTechStackResponseDtoList: MemberTechStack[];
 }

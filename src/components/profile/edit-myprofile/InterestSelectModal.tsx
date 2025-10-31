@@ -10,22 +10,24 @@ import {
   addFavoriteTag,
   removeFavoriteTag,
 } from "../../../api/board-common/UserTagAPI";
-import { useDebounce } from "../../../hooks/useDebounce"; // npm install lodash
+import { useDebounce } from "../../../hooks/useDebounce";
 
-interface TagFilterModalProps {
+interface InterestSelectModalProps {
   onClose: () => void;
-  onApply: (selectedTags: string[]) => void;
+  onApply: (selectedInterests: string[]) => void;
+  currentInterests: string[];
 }
 
-export default function TagFilterModal({
+export default function InterestSelectModal({
   onClose,
   onApply,
-}: TagFilterModalProps) {
+  currentInterests,
+}: InterestSelectModalProps) {
   const [search, setSearch] = useState("");
-  const debouncedSearch = useDebounce(search, 300); // 300ms 디바운스
+  const debouncedSearch = useDebounce(search, 300);
   const [allTags, setAllTags] = useState<Tag[]>([]);
-  const [selectedTags, setSelectedTags] = useState<string[]>([]);
-  const [initialTags, setInitialTags] = useState<string[]>([]); // 초기 즐겨찾기 태그 저장
+  const [selectedInterests, setSelectedInterests] = useState<string[]>(currentInterests);
+  const [initialInterests, setInitialInterests] = useState<string[]>(currentInterests); // 초기 관심분야 저장
   const [errorMessage, setErrorMessage] = useState("");
   const [filteredTags, setFilteredTags] = useState<Tag[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -44,12 +46,13 @@ export default function TagFilterModal({
           setAllTags(tagsRes.value.tags);
         }
 
-        if (favoritesRes.status === "fulfilled") {
+        // currentInterests가 비어있으면 서버에서 불러온 즐겨찾기 사용
+        if (favoritesRes.status === "fulfilled" && currentInterests.length === 0) {
           const favoriteTagNames = favoritesRes.value.favoriteTags.map(
             (tag) => tag.tagName
           );
-          setSelectedTags(favoriteTagNames);
-          setInitialTags(favoriteTagNames);
+          setSelectedInterests(favoriteTagNames);
+          setInitialInterests(favoriteTagNames);
         }
       } catch (e) {
         console.error("태그 목록 불러오기 실패", e);
@@ -57,11 +60,11 @@ export default function TagFilterModal({
         setIsLoading(false);
       }
     })();
-  }, []);
+  }, [currentInterests]);
 
-  // 태그 선택/제거
-  const toggleTag = (tagName: string) => {
-    setSelectedTags((prev) => {
+  // 관심분야 선택/제거
+  const toggleInterest = (tagName: string) => {
+    setSelectedInterests((prev) => {
       if (prev.includes(tagName)) {
         setErrorMessage("");
         return prev.filter((t) => t !== tagName);
@@ -76,8 +79,9 @@ export default function TagFilterModal({
     });
   };
 
-  const removeTag = (tagName: string) => {
-    setSelectedTags((prev) => prev.filter((t) => t !== tagName));
+  const removeInterest = (tagName: string) => {
+    setSelectedInterests((prev) => prev.filter((t) => t !== tagName));
+    setErrorMessage("");
   };
 
   // 검색 처리 : 디바운싱된 검색어로만 요청함
@@ -123,7 +127,7 @@ export default function TagFilterModal({
         setFilteredTags(unique);
       } catch (err) {
         console.error("검색 중 오류 발생:", err);
-        setFilteredTags(localMatches); // 로컬 필터만이라도 사용
+        setFilteredTags(localMatches);
       }
     };
 
@@ -153,20 +157,21 @@ export default function TagFilterModal({
 
         {/* 스크롤 영역 */}
         <div className="flex-1 p-8 overflow-y-auto pb-36">
-          <h2 className="text-xl font-bold mb-4 text-[#002F6C]">관심분야</h2>
+          <h2 className="text-xl font-bold mb-4 text-[#002F6C]">관심분야 선택</h2>
+          <p className="mb-4 text-sm text-gray-600">최대 7개까지 선택 가능합니다</p>
 
-          {/* 선택된 태그 표시 */}
-          {selectedTags.length > 0 && (
+          {/* 선택된 관심분야 표시 */}
+          {selectedInterests.length > 0 && (
             <div className="flex flex-wrap gap-2 mb-4">
-              {selectedTags.map((tag) => (
+              {selectedInterests.map((interest) => (
                 <div
-                  key={tag}
-                  className="flex items-center gap-1 px-3 py-1 text-sm border rounded-full"
+                  key={interest}
+                  className="flex items-center gap-1 px-3 py-1 text-sm bg-[#002F6C] text-white border border-[#002F6C] rounded-full"
                 >
-                  {tag}
+                  {interest}
                   <button
-                    onClick={() => removeTag(tag)}
-                    className="text-gray-500 hover:text-red-500"
+                    onClick={() => removeInterest(interest)}
+                    className="text-white hover:text-red-300"
                   >
                     ×
                   </button>
@@ -185,7 +190,7 @@ export default function TagFilterModal({
             onKeyDown={(e) => {
               if (e.key === "Enter" && filteredTags.length > 0) {
                 e.preventDefault(); // 기본 폼 제출 방지
-                toggleTag(filteredTags[0].tagName); // 첫 번째 태그 선택
+                toggleInterest(filteredTags[0].tagName); // 첫 번째 태그 선택
               }
             }}
           />
@@ -204,9 +209,9 @@ export default function TagFilterModal({
                   {filteredTags.map((tag) => (
                     <button
                       key={tag.tagId}
-                      onClick={() => toggleTag(tag.tagName)}
+                      onClick={() => toggleInterest(tag.tagName)}
                       className={`px-3 py-1 rounded-full border text-sm transition ${
-                        selectedTags.includes(tag.tagName)
+                        selectedInterests.includes(tag.tagName)
                           ? "bg-[#002F6C] text-white border-[#002F6C]"
                           : "border-gray-300 hover:bg-gray-100"
                       }`}
@@ -221,6 +226,7 @@ export default function TagFilterModal({
             </div>
           )}
 
+          {/* 카테고리별 태그 목록 */}
           <div className="mt-6">
             {Object.entries(groupedTags).map(([category, tags]) => (
               <div key={category} className="mb-6">
@@ -229,9 +235,9 @@ export default function TagFilterModal({
                   {tags.map((tag) => (
                     <button
                       key={tag.tagId}
-                      onClick={() => toggleTag(tag.tagName)}
+                      onClick={() => toggleInterest(tag.tagName)}
                       className={`px-3 py-1 rounded-full border text-sm transition ${
-                        selectedTags.includes(tag.tagName)
+                        selectedInterests.includes(tag.tagName)
                           ? "bg-[#002F6C] text-white border-[#002F6C]"
                           : "border-gray-300 hover:bg-gray-100"
                       }`}
@@ -249,36 +255,41 @@ export default function TagFilterModal({
         <div className="absolute bottom-0 left-0 flex justify-between w-full px-8 py-4 bg-white border-t rounded-b-xl">
           <button
             className="w-full px-4 py-3 mr-2 text-gray-700 border rounded hover:bg-gray-100"
-            onClick={() => setSelectedTags([])}
+            onClick={() => {
+              setSelectedInterests([]);
+              setErrorMessage("");
+            }}
           >
             ⟳ 초기화
           </button>
           <button
             className="w-full px-4 py-3 ml-2 text-white bg-[#002F6C] rounded hover:bg-[#001f4d] disabled:opacity-50 disabled:cursor-not-allowed"
             onClick={async () => {
-              try {
-                setIsLoading(true);
+              setIsLoading(true);
 
+              try {
                 // 변경사항 계산
-                const tagsToAdd = selectedTags.filter(
-                  (tag) => !initialTags.includes(tag)
+                const interestsToAdd = selectedInterests.filter(
+                  (interest) => !initialInterests.includes(interest)
                 );
-                const tagsToRemove = initialTags.filter(
-                  (tag) => !selectedTags.includes(tag)
+                const interestsToRemove = initialInterests.filter(
+                  (interest) => !selectedInterests.includes(interest)
                 );
 
                 // 서버에 변경사항 저장
                 await Promise.all([
-                  ...tagsToAdd.map((tag) => addFavoriteTag(tag)),
-                  ...tagsToRemove.map((tag) => removeFavoriteTag(tag)),
+                  ...interestsToAdd.map((interest) => addFavoriteTag(interest)),
+                  ...interestsToRemove.map((interest) => removeFavoriteTag(interest)),
                 ]);
 
-                onApply(selectedTags);
+                console.log("✅ 관심분야 서버 저장 완료:", selectedInterests);
               } catch (e) {
-                console.error("즐겨찾기 태그 저장 실패", e);
-                alert("태그 저장에 실패했습니다. 다시 시도해주세요.");
+                console.error("❌ 관심분야 저장 실패", e);
+                alert("관심분야 저장에 실패했습니다. 다시 시도해주세요.");
               } finally {
                 setIsLoading(false);
+                // 에러가 나든 안 나든 UI는 업데이트
+                onApply(selectedInterests);
               }
             }}
             disabled={isLoading}

@@ -11,6 +11,7 @@ import {
   ItemTitle,
 } from "../assets/styles/profile.styles"; // 프로필 grid 적용
 import { getMemberProfile } from "../api/profile/ProfileAPI";
+import { getFavoriteTags } from "../api/board-common/UserTagAPI";
 import { ProfileType } from "../types/profile";
 import SkeletonProfileCard from "../components/profile/card/SkeletonProfileCard";
 import ProfileCard from "../components/profile/card/ProfileCard";   // 프로필 카드 컴포넌트
@@ -53,25 +54,34 @@ export default function Profile() {
       // 프로필 데이터 불러오기
       const fetchProfile = async () => {
         try {
-          const data = await getMemberProfile();
-          const profileData: ProfileType = {
-            memberId: data.memberId,
-            image: data.memberImageUrl,
-            name: data.memberName,
-            email: data.memberEmail,
-            major: data.memberDepartmentResponseDtoList[0]?.departmentName || "",
-            introduce: data.memberIntroduce || "",
-            techStacks: data.memberTechStackResponseDtoList.map(
+          const [profileData, favoriteTagsData] = await Promise.all([
+            getMemberProfile(),
+            getFavoriteTags().catch(() => ({ favoriteTags: [] })),
+          ]);
+
+          const interests = favoriteTagsData.favoriteTags?.map(
+            (tag: { tagId: number; tagName: string }) => tag.tagName
+          ) || [];
+
+          const profile: ProfileType = {
+            memberId: profileData.memberId,
+            image: profileData.memberImageUrl,
+            name: profileData.memberName,
+            email: profileData.memberEmail,
+            major: profileData.memberDepartmentResponseDtoList[0]?.departmentName || "",
+            introduce: profileData.memberIntroduce || "",
+            interests: interests,
+            techStacks: profileData.memberTechStackResponseDtoList.map(
               (t: { techStackId: number; techStackName: string }) => t.techStackName
             ),
             sns: [
-              data.memberSnsUrl1,
-              data.memberSnsUrl2,
-              data.memberSnsUrl3,
-              data.memberSnsUrl4,
+              profileData.memberSnsUrl1,
+              profileData.memberSnsUrl2,
+              profileData.memberSnsUrl3,
+              profileData.memberSnsUrl4,
             ].filter(Boolean),
           };
-          setProfile(profileData);
+          setProfile(profile);
         } catch (err) {
           console.error("프로필 정보를 불러오지 못했습니다", err);
           setModalContent({

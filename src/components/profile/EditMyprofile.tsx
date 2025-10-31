@@ -7,6 +7,7 @@ import {
   uploadProfileImage,
   updateMemberProfile,
 } from "../../api/profile/ProfileAPI";
+import { getFavoriteTags } from "../../api/board-common/UserTagAPI";
 import axios from "axios";
 
 import {
@@ -15,12 +16,15 @@ import {
   TechStackResponse,
   ProfileFormData,
 } from "../../types/profile";
+import { getAllTags, type Tag } from "../../api/board-common/TagListAPI";
 
 // 하위 컴포넌트 import
 import EditProfileImage from "./edit-myprofile/EditProfileImage";
 import EditProfileField from "./edit-myprofile/EditProfileField";
 import EditDepartment from "./edit-myprofile/EditDepartment";
 import EditIntroduce from "./edit-myprofile/EditIntroduce";
+import EditInterests from "./edit-myprofile/EditInterests";
+import InterestSelectModal from "./edit-myprofile/InterestSelectModal";
 import EditTechStacks from "./edit-myprofile/EditTechStacks";
 import EditSNS from "./edit-myprofile/EditSNS";
 import EditProfileButtons from "./edit-myprofile/EditProfileButtons";
@@ -40,15 +44,19 @@ export default function EditMyProfile() {
     image: "",
     uploadedImagePath: "",
     techStacks: [],
+    interests: [],
   });
 
   const [departmentsList, setDepartmentsList] = useState<Item[]>([]);
   const [techList, setTechList] = useState<Item[]>([]);
+  const [tagList, setTagList] = useState<Tag[]>([]);
 
   const [departmentInput, setDepartmentInput] = useState("");
   const [filteredDepartments, setFilteredDepartments] = useState<Item[]>([]);
   const [newTech, setNewTech] = useState("");
   const [filteredTechs, setFilteredTechs] = useState<Item[]>([]);
+
+  const [showInterestModal, setShowInterestModal] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const accessToken = useSelector(selectAccessToken);
@@ -66,33 +74,48 @@ export default function EditMyProfile() {
   }, []);
 
   const fetchData = async () => {
-    const data = await getMemberProfile();
+    const [profileData, favoriteTagsData] = await Promise.all([
+      getMemberProfile(),
+      getFavoriteTags().catch(() => ({ favoriteTags: [] })), // 에러 시 빈 배열
+    ]);
+
+    console.log("📥 프로필 데이터:", profileData);
+    console.log("📥 즐겨찾기 태그 데이터:", favoriteTagsData);
+
+    // 관심분야는 UserTagAPI에서 가져옴
+    const interests = favoriteTagsData.favoriteTags?.map(
+      (tag: { tagId: number; tagName: string }) => tag.tagName
+    ) || [];
+    console.log("📥 매핑된 관심분야 (UserTagAPI):", interests);
+
     setProfile({
-      image: data.memberImageUrl || "/assets/images/user.png",
-      uploadedImagePath: data.memberImageUrl || "",
-      name: data.memberName,
-      email: data.memberEmail,
-      major: data.memberDepartmentResponseDtoList?.[0]?.departmentName || "",
-      introduce: data.memberIntroduce || "",
-      techStacks: data.memberTechStackResponseDtoList.map(
+      image: profileData.memberImageUrl || "/assets/images/user.png",
+      uploadedImagePath: profileData.memberImageUrl || "",
+      name: profileData.memberName,
+      email: profileData.memberEmail,
+      major: profileData.memberDepartmentResponseDtoList?.[0]?.departmentName || "",
+      introduce: profileData.memberIntroduce || "",
+      techStacks: profileData.memberTechStackResponseDtoList.map(
         (t: { techStackId: number; techStackName: string }) => t.techStackName
       ),
+      interests: interests,
       sns: [
-        data.memberSnsUrl1,
-        data.memberSnsUrl2,
-        data.memberSnsUrl3,
-        data.memberSnsUrl4,
+        profileData.memberSnsUrl1,
+        profileData.memberSnsUrl2,
+        profileData.memberSnsUrl3,
+        profileData.memberSnsUrl4,
       ].filter(Boolean),
     });
     setDepartmentInput(
-      data.memberDepartmentResponseDtoList?.[0]?.departmentName || ""
+      profileData.memberDepartmentResponseDtoList?.[0]?.departmentName || ""
     );
   };
 
   const getItems = async () => {
-    const [deps, techs] = await Promise.all([
+    const [deps, techs, tags] = await Promise.all([
       getDepartments(),
       getTech(),
+      getAllTags(),
     ]);
 
     setDepartmentsList(deps.map((d: DepartmentResponse) => ({
@@ -104,6 +127,8 @@ export default function EditMyProfile() {
       id: t.techStackId,
       name: t.techStackName,
     })));
+
+    setTagList(tags.tags);
   };
 
   const handleChange = (field: string, value: string) => {
@@ -152,6 +177,14 @@ export default function EditMyProfile() {
     }));
   };
 
+  const handleApplyInterests = (selectedInterests: string[]) => {
+    setProfile((prev: ProfileFormData) => ({
+      ...prev,
+      interests: selectedInterests,
+    }));
+    setShowInterestModal(false);
+  };
+
   const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) {
@@ -197,19 +230,25 @@ export default function EditMyProfile() {
         .filter((t) => profile.techStacks.includes(t.name))
         .map((t) => t.id);
 
+      // 관심분야는 UserTagAPI에서 이미 저장되므로 여기서는 제외
+      console.log("💾 저장할 관심분야 (UserTagAPI에서 처리됨):", profile.interests);
+
       const imageToUse = profile.uploadedImagePath || profile.image || "/assets/images/user.png";
       const [sns1 = "", sns2 = "", sns3 = ""] = profile.sns;
 
-      await updateMemberProfile({
+      const payload = {
         memberIntroduce: profile.introduce,
         memberImageUrl: imageToUse,
         memberSnsUrl1: sns1,
         memberSnsUrl2: sns2,
         memberSnsUrl3: sns3,
         memberDepartmentUpdateRequestIdList: departmentId ? [departmentId] : [],
-        memberInterestUpdateRequestIdList: [],
+        // memberInterestUpdateRequestIdList 제거 - UserTagAPI 사용
         memberTechStackUpdateRequestIdList: techStackIdList,
-      });
+      };
+      console.log("💾 전송할 데이터:", payload);
+
+      await updateMemberProfile(payload);
 
       setModalContent({
         title: "프로필 수정 완료",
@@ -269,6 +308,21 @@ export default function EditMyProfile() {
           isEditing={isEditing}
           onChange={(val) => handleChange("introduce", val)}
         />
+
+        <EditInterests
+          isEditing={isEditing}
+          interests={profile.interests}
+          onOpenModal={() => setShowInterestModal(true)}
+        />
+
+        {/* 관심분야 선택 모달 */}
+        {showInterestModal && (
+          <InterestSelectModal
+            onClose={() => setShowInterestModal(false)}
+            onApply={handleApplyInterests}
+            currentInterests={profile.interests}
+          />
+        )}
 
         <EditTechStacks
           techStacks={profile.techStacks}

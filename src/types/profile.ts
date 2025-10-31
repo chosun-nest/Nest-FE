@@ -1,4 +1,4 @@
-// 프로필 컴포넌트 관련 타입
+// 프론트엔드용 - 프로필 컴포넌트 타입 정의
 export interface Item {
   id: number;
   name: string;
@@ -14,20 +14,25 @@ export interface TechStackResponse {
   techStackName: string;
 }
 
+export interface InterestResponse {
+  interestId: number;
+  interestName: string;
+}
+
 export interface ProfileType {
   memberId: number;
   name: string;
   email: string;
   major: string;
   introduce: string;
-  //interests: string[];
+  interests: string[];
   sns: string[];
   image: string;
   uploadedImagePath?: string;
   techStacks: string[];
 }
 
-export interface ProfileFormData {    
+export interface ProfileFormData {
   name: string;
   email: string;
   major: string;
@@ -36,6 +41,7 @@ export interface ProfileFormData {
   image: string;
   uploadedImagePath: string;
   techStacks: string[];
+  interests: string[];
 }
 
 export interface ProfileCardProps {

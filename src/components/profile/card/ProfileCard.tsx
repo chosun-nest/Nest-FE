@@ -28,6 +28,7 @@ export default function ProfileCard({ profile, isOwnProfile }: ProfileCardProps)
   const [followerCount, setFollowerCount] = useState(0);
   const [followingCount, setFollowingCount] = useState(0);
   const [modalType, setModalType] = useState<"follower" | "following" | null>(null);
+  const [showAllInterests, setShowAllInterests] = useState(false);
 
   useEffect(() => {
     const fetchCounts = async () => {
@@ -173,6 +174,32 @@ export default function ProfileCard({ profile, isOwnProfile }: ProfileCardProps)
             );
           })}
         </div>
+
+        {/* 관심분야 */}
+        {profile.interests && profile.interests.length > 0 && (
+          <div className="mt-2">
+            <div className="flex flex-wrap gap-2">
+              {(showAllInterests ? profile.interests : profile.interests.slice(0, 3)).map(
+                (interest: string, i: number) => (
+                  <span
+                    key={i}
+                    className="inline-flex items-center px-3 py-1 text-xs font-medium bg-blue-50 text-[#002F6C] border border-blue-200 rounded-full"
+                  >
+                    {interest}
+                  </span>
+                )
+              )}
+            </div>
+            {profile.interests.length > 3 && (
+              <button
+                onClick={() => setShowAllInterests(!showAllInterests)}
+                className="mt-2 text-xs text-[#002F6C] hover:underline font-medium"
+              >
+                {showAllInterests ? "접기 ▲" : `더보기 (${profile.interests.length - 3}개 더) ▼`}
+              </button>
+            )}
+          </div>
+        )}
 
         {/* SNS 아이콘 */}
         <div className="flex items-center justify-center gap-3 mt-10">
