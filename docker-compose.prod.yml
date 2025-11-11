@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  # Nginx 프론트엔드 서버
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.prod
+    container_name: nest-frontend
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      # Let's Encrypt 인증서 볼륨
+      - ./certbot/conf:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot
+      # Nginx 로그
+      - ./logs/nginx:/var/log/nginx
+    networks:
+      - nest-network
+    depends_on:
+      - certbot
+
+  # Certbot (Let's Encrypt SSL 인증서 자동 갱신)
+  certbot:
+    image: certbot/certbot:latest
+    container_name: nest-certbot
+    volumes:
+      - ./certbot/conf:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot
+    # 인증서 자동 갱신 (매일 12시간마다 체크)
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew --webroot -w /var/www/certbot --quiet; sleep 12h & wait $${!}; done;'"
+    networks:
+      - nest-network
+
+networks:
+  nest-network:
+    driver: bridge
