@@ -9,6 +9,7 @@ import {
 import { showModal } from "../store/slices/modalSlice";
 
 export const API = axios.create({
+  // Use VITE_BASE_URL defined in .env
   baseURL: import.meta.env.VITE_API_BASE_URL,
   withCredentials: true,
 });
