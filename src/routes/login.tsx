@@ -24,6 +24,12 @@ export default function Login() {
   // dispatch 초기화
   const dispatch = useDispatch();
 
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      handleLogin();
+    }
+  };
+
   const handleLogin = async () => {
     if (!isEmailValid) {
       setModalMessage("이메일 형식이 올바르지 않습니다.");
@@ -55,7 +61,7 @@ export default function Login() {
   };
 
   return (
-    <S.Container>
+    <S.Container onKeyDown={handleKeyDown}>
       {/* 로고 위치를 동적으로 조절 */}
       {showModal && (
         <Modal

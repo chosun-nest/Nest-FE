@@ -293,8 +293,9 @@ export const AuthCodeButton = styled.button`
   width: 100%;
   height: 100%;
   max-width: 110px;
-  min-height: 40px;
+  min-height: 42px;
   border: 1px solid #00256c;
+  border-radius: 6px;
   font-size: 13px;
   color: 00256C;
   &:hover {
@@ -331,10 +332,11 @@ export const SubText = styled.p<{ $isValid?: boolean }>`
 
 export const EmailRow = styled.div`
   display: flex;
+  flex-direction: row;
   gap: 0.5rem;
-  align-items: center;
   justify-content: center;
   width: 100%;
+  height: 100%;
 `;
 
 export const TimerInputWrapper = styled.div`

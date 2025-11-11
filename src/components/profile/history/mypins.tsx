@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { FaStar, FaRegStar } from "react-icons/fa"; // ★ 추가: 비어있는 별
+import { FaStar, FaRegStar } from "react-icons/fa";
 import {
   getUsersAllHistory,
   updateHistory,
@@ -43,32 +43,43 @@ export default function MyPin({ title, editable = false }: MyPinProps) {
   }, []);
 
   return (
-    <ul className="mb-4 space-y-1">
-      <li className="font-semibold">{title}</li>
+    <div className="mb-6">
+      <h3 className="text-base font-semibold text-gray-700 mb-3">{title}</h3>
+
       {pinnedItems.length > 0 ? (
-        pinnedItems.map((item, idx) => (
-          <li key={idx} className="flex items-center gap-2 ml-4 text-gray-800">
-            •{" "}
-            <strong>
-              {item.startDate}~{item.endDate}
-            </strong>{" "}
-            {item.content}
-            {editable && (
-              <button onClick={() => toggleImportant(item)}>
-                {item.important ? (
-                  <FaStar className="text-yellow-400 cursor-pointer" />
-                ) : (
-                  <FaRegStar className="text-black border border-black cursor-pointer" />
-                )}
-              </button>
-            )}
-          </li>
-        ))
+        <ul className="space-y-2">
+          {pinnedItems.map((item, idx) => (
+            <li
+              key={idx}
+              className="flex items-start justify-between bg-white rounded-lg shadow-sm px-4 py-3 border border-gray-100 hover:shadow-md transition-all duration-300"
+            >
+              <div className="flex flex-col text-sm text-gray-700">
+                <span className="text-xs text-gray-400 font-medium mb-1">
+                  {item.startDate} ~ {item.endDate}
+                </span>
+                <span className="whitespace-pre-line">{item.content}</span>
+              </div>
+
+              {editable && (
+                <button
+                  onClick={() => toggleImportant(item)}
+                  className="ml-4 mt-1 transition-transform duration-200 hover:scale-110"
+                >
+                  {item.important ? (
+                    <FaStar className="text-yellow-400" />
+                  ) : (
+                    <FaRegStar className="text-gray-400" />
+                  )}
+                </button>
+              )}
+            </li>
+          ))}
+        </ul>
       ) : (
-        <li className="text-sm text-gray-400 ml-4">
+        <div className="text-sm text-gray-400 ml-1">
           중요 표시된 항목이 없습니다
-        </li>
+        </div>
       )}
-    </ul>
+    </div>
   );
 }

@@ -11,31 +11,20 @@ export default function InterestBoardSortTabs({ sortType, onChange }: Props) {
   ];
 
   return (
-    <div className="mb-4">
-      <div className="flex gap-3 mb-2 text-sm text-gray-500">
-        {tabs.map((tab) => (
-          <div key={tab.value} className="flex items-center gap-1.5">
-            <span className="text-xs">
-              <span
-                className={`inline-block align-middle w-2 h-2 rounded-full ${
-                  sortType === tab.value ? "bg-blue-300" : "bg-transparent"
-                }`}
-              ></span>
-            </span>
-            <button
-              onClick={() => onChange(tab.value)}
-              className={`font-semibold transition-colors duration-150 ${
-                sortType === tab.value
-                  ? "text-black"
-                  : "text-gray-400 hover:text-gray-600"
-              }`}
-            >
-              {tab.label}
-            </button>
-          </div>
-        ))}
-      </div>
-      <hr className="border-t border-gray-200" />
+    <div className="flex gap-2 mt-4 sm:mt-0">
+      {tabs.map((tab) => (
+        <button
+          key={tab.value}
+          onClick={() => onChange(tab.value)}
+          className={`px-3 py-1 text-sm rounded border font-semibold ${
+            sortType === tab.value
+              ? "bg-blue-500 text-white"
+              : "bg-white text-gray-700 hover:bg-gray-100"
+          }`}
+        >
+          {tab.label}
+        </button>
+      ))}
     </div>
   );
 }

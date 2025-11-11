@@ -1,40 +1,18 @@
-// 기술 필터 & 선택 태그
+// 기술 필터 & 선택 태그 > 버튼만 랜더링 하게 변경. 태그 선택된 리스트는 SelectedTagList.tsx 사용하면 됨
 interface Props {
-  selectedTags: string[];
-  onRemoveTag: (tag: string) => void;
-  onOpenFilter: () => void;
+  onOpenFilter?: () => void;
 }
 
-export default function BoardTagFilterButton({
-  selectedTags,
-  onRemoveTag,
-  onOpenFilter,
-}: Props) {
-  return (
-    <div className="mb-6">
-      {/* 버튼 */}
-      <div className="mb-3">
-        <button
-          onClick={onOpenFilter}
-          className="px-3 py-2 text-sm text-gray-800 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200"
-        >
-          🔎 태그 선택
-        </button>
-      </div>
+export default function BoardTagFilterButton({ onOpenFilter }: Props) {
+  if (!onOpenFilter) return null;
 
-      {/* 태그 리스트 */}
-      <div className="flex flex-wrap gap-2">
-        {selectedTags.map((tag) => (
-          <span
-            key={tag}
-            onClick={() => onRemoveTag(tag)}
-            className="inline-flex items-center px-2 py-1 text-[13px] font-medium bg-gray-100 text-gray-800 border border-gray-300 rounded-md cursor-pointer hover:bg-gray-200 transition"
-          >
-            {tag}
-            <span className="ml-1">×</span>
-          </span>
-        ))}
-      </div>
-    </div>
+  return (
+    <button
+      onClick={onOpenFilter}
+      className="px-3 py-2 text-sm text-gray-800 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200 h-[38px] flex items-center justify-center gap-1.5 min-w-0"
+    >
+      <span className="shrink-0">🔎</span>
+      <span className="truncate">태그 선택</span>
+    </button>
   );
 }

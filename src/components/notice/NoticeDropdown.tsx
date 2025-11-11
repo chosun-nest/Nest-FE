@@ -11,8 +11,12 @@ const categories = [
   "일반공지",
   "학사공지",
   "장학공지",
-  "IT융합대학 공지",
-  "컴퓨터공학과 공지",
+  "SW중심대학사업단",
+  "IT융합대학",
+  "컴퓨터공학전공",
+  "정보통신공학전공",
+  "인공지능공학전공",
+  "모빌리티SW전공",
 ];
 
 export default function NoticeDropdown({ selected, onChange }: Props) {

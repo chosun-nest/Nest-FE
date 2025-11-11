@@ -8,7 +8,7 @@ export default function Footer() {
         <div>
           <h1 className="text-2xl font-bold text-white mb-2">WantIT-NEST</h1>
           <p className="text-sm text-gray-400">
-            성장과 영감을 주는 콘텐츠를 공유하는 공간입니다.
+            흩어진 정보와 사람을 하나로, 함께 성장하는 IT 커뮤니티
           </p>
         </div>
 

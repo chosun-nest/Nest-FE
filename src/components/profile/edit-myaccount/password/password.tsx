@@ -1,4 +1,4 @@
-// password 수정 전체 컴포넌트
+// password 변경 주 컴포넌트
 import { useState, useEffect } from "react";
 import PasswordSummary from "./PasswordSummary";
 import ChangePasswordModal from "./PasswordChangeModal";

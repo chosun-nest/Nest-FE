@@ -4,10 +4,11 @@ import * as S from "../../assets/styles/navbar.styles";
 import useResponsive from "../../hooks/responsive";
 import { useNavigate } from "react-router-dom";
 import { useNavbarHeight } from "../../context/NavbarHeightContext";
-import { getMemberProfile, MemberProfile } from "../../api/profile/ProfileAPI";
+import { getMemberProfile } from "../../api/profile/ProfileAPI";
 import Sidebar from "./sidebar";
 import { useDispatch, useSelector } from "react-redux";
 import { clearTokens, selectAccessToken } from "../../store/slices/authSlice";
+import { MemberProfile } from "../../types/api/profile";
 
 function Navbar(_: unknown, ref: ForwardedRef<HTMLDivElement>) {
   const isMobile = useResponsive();
@@ -52,7 +53,6 @@ function Navbar(_: unknown, ref: ForwardedRef<HTMLDivElement>) {
     // accessToken 값이 변경될 때마다 이 useEffect가 다시 실행됨
   }, [accessToken]); // accessToken을 의존성 배열에 추가
 
-  // ResizeObserver로 Navbar 높이 자동 감지
   useEffect(() => {
     if (!ref || !("current" in ref) || !ref.current) return;
     const observer = new ResizeObserver(() => {
@@ -64,7 +64,6 @@ function Navbar(_: unknown, ref: ForwardedRef<HTMLDivElement>) {
     return () => observer.disconnect();
   }, [ref, setNavbarHeight]);
 
-  // 바깥 클릭 시 메뉴 닫기
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
@@ -86,7 +85,7 @@ function Navbar(_: unknown, ref: ForwardedRef<HTMLDivElement>) {
         <S.NavbarContent>
           <S.NavLeft>
             <S.Logo to="/">
-              <img src="assets/images/logo.png" alt="Logo" />
+              <img src="/assets/images/logo.png" alt="Logo" />
               WantIT-NEST
               {/*이스터에그*/}
               <div
@@ -100,15 +99,17 @@ function Navbar(_: unknown, ref: ForwardedRef<HTMLDivElement>) {
           <S.NavCenter>
             {!isMobile ? (
               <>
-                {" "}
                 <S.NavbarLink to="/notice-board">
-                  <S.WebBarItem>학사공지</S.WebBarItem>
+                  <S.WebBarItem>공지사항 게시판</S.WebBarItem>
                 </S.NavbarLink>
                 <S.NavbarLink to="/project-board">
-                  <S.WebBarItem>프로젝트 모집</S.WebBarItem>
+                  <S.WebBarItem>프로젝트 모집 게시판</S.WebBarItem>
                 </S.NavbarLink>
                 <S.NavbarLink to="/interests-board">
-                  <S.WebBarItem>관심분야 정보</S.WebBarItem>
+                  <S.WebBarItem>관심분야 게시판</S.WebBarItem>
+                </S.NavbarLink>
+                <S.NavbarLink to="/lecture-board">
+                  <S.WebBarItem>매칭 서비스</S.WebBarItem>
                 </S.NavbarLink>
                 <S.NavbarLink to="/chat">
                   <S.WebBarItem>채팅방</S.WebBarItem>

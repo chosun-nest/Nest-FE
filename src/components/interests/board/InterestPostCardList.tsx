@@ -5,7 +5,10 @@ interface InterestPostCardListProps {
     title: string;
     previewContent: string;
     tags: string[];
-    authorName: string;
+    author: {         // 작성자 정보
+      id: number;
+      name: string;
+    };
     createdAt: string;
     viewCount: number;
     likeCount: number;
@@ -14,21 +17,28 @@ interface InterestPostCardListProps {
   onCardClick: (postId: number) => void; // 카드 클릭 핸들러 추가
 }
 
-export default function InterestPostCardList({ posts, onCardClick }: InterestPostCardListProps) {
-  const isMobile = useResponsive();
+export default function InterestPostCardList({
+  posts,
+  onCardClick,
+}: InterestPostCardListProps) {
+  const isMobile = useResponsive();     // 모바일 대응 없애기
 
   return (
     <div className="space-y-4">
       {posts
-        .filter((post) => !!post.postId)
+        .filter((post) => !!post.postId && !!post.author)
         .map((post) => (
           <div
             key={post.postId}
-            onClick={() => onCardClick(post.postId)} // navigate → props 호출
+            onClick={() => onCardClick(post.postId)} // navigate > props 호출
             className="p-4 border rounded-lg cursor-pointer hover:shadow"
           >
-            <div className={`flex items-center gap-2 mb-2 ${isMobile ? "flex-wrap" : ""}`}>
-              <h2 className={`font-semibold ${isMobile ? "text-base" : "text-lg"}`}>
+            <div
+              className={`flex items-center gap-2 mb-2 ${isMobile ? "flex-wrap" : ""}`}
+            >
+              <h2
+                className={`font-semibold ${isMobile ? "text-base" : "text-lg"}`}
+              >
                 {post.title}
               </h2>
             </div>
@@ -54,7 +64,15 @@ export default function InterestPostCardList({ posts, onCardClick }: InterestPos
 
             <div className="flex justify-between text-xs text-gray-500">
               <span>
-                {post.authorName} • {post.createdAt.slice(0, 10)}
+                {post.author ? (
+                  <span>
+                    {post.author.name} • {post.createdAt}
+                  </span>
+                ) : (
+                  <span>
+                    작성자 없음 • {post.createdAt}
+                  </span>
+                )}
               </span>
               <div className="flex gap-3">
                 <span>조회수 {post.viewCount}</span>

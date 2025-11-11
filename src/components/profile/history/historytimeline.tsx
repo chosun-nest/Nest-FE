@@ -129,95 +129,83 @@ export default function HistoryTimeline() {
           onCancel={handleCancelDelete}
         />
       )}
+      <div className="relative w-full py-10 px-6 mb-10 overflow-hidden">
+        {/* 수평선 */}
+        <div className="absolute top-1/2 left-0 right-0 h-px bg-gray-300 z-0" />
 
-      {/* 타임라인 바 */}
-      <div className="relative w-full h-12 mb-12">
-        <div className="absolute top-1/2 w-full border-t-4 border-blue-800"></div>
-
-        <div className="flex items-center px-4 gap-6">
-          {/* 좌측 고정: 전체 버튼 */}
+        <div className="relative z-10 flex items-end gap-12">
+          {/* 항상 좌측 고정: 전체 버튼 */}
           <div
             onClick={() => setSelectedYear(null)}
             className={`flex flex-col items-center cursor-pointer transition-all duration-300 ${
               selectedYear === null
                 ? "scale-110"
-                : "opacity-80 hover:opacity-100"
+                : "opacity-60 hover:opacity-100"
             }`}
           >
-            <div className="w-1 h-6 bg-yellow-500" />
+            <div
+              className={`w-1.5 h-12 rounded-md transition-all duration-300 ${
+                selectedYear === null ? "bg-yellow-400" : "bg-gray-400"
+              }`}
+            />
             <span
-              className={`text-sm mt-1 ${
+              className={`mt-2 text-sm ${
                 selectedYear === null
-                  ? "text-yellow-700 font-semibold"
-                  : "text-blue-900"
+                  ? "text-yellow-600 font-semibold"
+                  : "text-gray-500"
               }`}
             >
               전체
             </span>
           </div>
 
-          {/* 타임라인 연도 정렬 */}
-          {selectedYear === null ? (
-            // 전체 보기: 균등 정렬
-            <div className="flex-1 flex justify-between items-center transition-all duration-500">
-              {years.map((year) => (
+          {/* 연도 막대기들 */}
+          <div className="flex items-end justify-center gap-12 flex-1 transition-all duration-500">
+            {years.map((year) => {
+              const isSelected = selectedYear === year;
+
+              const direction =
+                selectedYear === null
+                  ? "center"
+                  : year < selectedYear
+                    ? "left"
+                    : year > selectedYear
+                      ? "right"
+                      : "center";
+
+              const baseTranslate =
+                selectedYear === null
+                  ? "translate-x-0"
+                  : direction === "left"
+                    ? "-translate-x-6"
+                    : direction === "right"
+                      ? "translate-x-6"
+                      : "translate-x-0";
+
+              return (
                 <div
                   key={year}
-                  className="flex flex-col items-center cursor-pointer transition-all duration-300 hover:scale-105"
                   onClick={() => setSelectedYear(year)}
+                  className={`group flex flex-col items-center cursor-pointer transition-transform duration-500 ${baseTranslate}`}
                 >
-                  <div className="w-1 h-6 bg-[#002f6c]" />
-                  <span className="text-sm mt-1 text-blue-900">{year}</span>
+                  <div
+                    className={`w-1.5 h-12 rounded-md transition-all duration-300 ease-in-out group-hover:scale-y-125 ${
+                      isSelected ? "bg-[#002f6c]" : "bg-gray-400"
+                    }`}
+                  />
+                  <span
+                    className={`mt-2 text-sm transition-all duration-300 ease-in-out ${
+                      isSelected
+                        ? "text-[#002f6c] font-semibold"
+                        : "text-gray-500 group-hover:opacity-100"
+                    }`}
+                  >
+                    {year}
+                  </span>
                 </div>
-              ))}
-            </div>
-          ) : (
-            // 선택된 연도 기준으로 좌우 분리 (순서는 항상 오름차순)
-            <div className="flex-1 flex items-center justify-center gap-12 transition-all duration-500 ease-in-out">
-              {/* 이전 연도들 (작은 값부터 선택 연도 전까지) */}
-              <div className="flex gap-4">
-                {years
-                  .filter((year) => year < selectedYear)
-                  .map((year) => (
-                    <div
-                      key={year}
-                      className="flex flex-col items-center cursor-pointer transition-transform duration-500 hover:scale-105"
-                      onClick={() => setSelectedYear(year)}
-                    >
-                      <div className="w-1 h-6 bg-[#002f6c]" />
-                      <span className="text-sm mt-1 text-blue-900">{year}</span>
-                    </div>
-                  ))}
-              </div>
-
-              {/* 선택된 연도 */}
-              <div
-                className="flex flex-col items-center cursor-pointer mx-6 transition-transform duration-500 scale-125"
-                onClick={() => setSelectedYear(null)}
-              >
-                <div className="w-1 h-6 bg-yellow-500" />
-                <span className="text-sm mt-1 text-yellow-700 font-bold">
-                  {selectedYear}
-                </span>
-              </div>
-
-              {/* 이후 연도들 (선택 연도 이후부터 끝까지) */}
-              <div className="flex gap-4">
-                {years
-                  .filter((year) => year > selectedYear)
-                  .map((year) => (
-                    <div
-                      key={year}
-                      className="flex flex-col items-center cursor-pointer transition-transform duration-500 hover:scale-105"
-                      onClick={() => setSelectedYear(year)}
-                    >
-                      <div className="w-1 h-6 bg-[#002f6c]" />
-                      <span className="text-sm mt-1 text-blue-900">{year}</span>
-                    </div>
-                  ))}
-              </div>
-            </div>
-          )}
+              );
+            })}
+          </div>
         </div>
       </div>
 

@@ -40,3 +40,10 @@ export const updateHistory = async (
   });
   return res.data;
 };
+
+export const getOthersAllHistory = async (memberId: number) => {
+  const res = await API.get(`/api/v1/members/${memberId}/histories`, {
+    headers: { skipAuth: false },
+  });
+  return res.data;
+};
