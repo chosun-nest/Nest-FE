@@ -17,7 +17,6 @@ export type ProjectRole = "FRONTEND" | "BACKEND" | "PM" | "DESIGN" | "AI" | "ETC
 
 export type ProjectFormData = {
   title: string;
-  category: string;
   description: string;
   // 아래 필드들은 API 미지원으로 주석처리 (추후 지원 시 활성화)
   // deadline: string;
@@ -31,7 +30,6 @@ export type ProjectFormData = {
 
 const initialFormData: ProjectFormData = {
   title: "",
-  category: "개발",
   description: `[개발 프로젝트 모집 예시]
 - 프로젝트 주제:
 - 프로젝트 목표:
@@ -73,7 +71,6 @@ export default function ProjectWrite() {
 
       return {
         title: editMode.projectTitle,
-        category: "개발",
         description: editMode.projectDescription,
         roles,
         myRole: editMode.creatorPart as ProjectRole,
