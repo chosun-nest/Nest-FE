@@ -12,6 +12,7 @@ import {
 } from "../../types/api/matching";
 import techColorMap from "../../utils/tech-corlor-map";
 
+
 interface MatchingSectionCardProps {
   title: string;
   icon: string;
@@ -36,7 +37,7 @@ export default function MatchingSectionCard({
   members,
   isLoading = false,
   error = null,
-  variant = "medium",
+  //variant = "medium",
   maxDisplay = 4,
   sectionType,
 }: MatchingSectionCardPropsExtended) {
@@ -46,6 +47,19 @@ export default function MatchingSectionCard({
   const [followingIds, setFollowingIds] = useState<Set<number>>(new Set());
   const [loadingFollowIds, setLoadingFollowIds] = useState<Set<number>>(new Set());
   const [isCheckingFollows, setIsCheckingFollows] = useState(true);
+  const [expandedIds, setExpandedIds] = useState<Set<number>>(new Set());
+
+  const toggleExpand = (memberId: number) => {
+    setExpandedIds((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(memberId)) {
+        newSet.delete(memberId);
+      } else {
+        newSet.add(memberId);
+      }
+      return newSet;
+    });
+  };
 
   // 팔로우 상태 확인
   useEffect(() => {
@@ -180,79 +194,158 @@ export default function MatchingSectionCard({
           const isOwnProfile = currentMemberId ? Number(currentMemberId) === member.memberId : false;
           const isFollowing = followingIds.has(member.memberId);
           const isFollowLoading = loadingFollowIds.has(member.memberId);
+          const isExpanded = expandedIds.has(member.memberId);
 
-          // 타입 가드를 사용한 매칭 정보 추출
           const matchCount = "matchCount" in member ? (member.matchCount as number) : undefined;
           const stackMatchCount = "stackMatchCount" in member ? (member.stackMatchCount as number) : undefined;
 
           return (
             <div
               key={member.memberId}
-              className="group flex items-center gap-3 p-2.5 lg:p-3 bg-gray-50 rounded-lg hover:bg-blue-50 hover:border hover:border-blue-200 transition-all duration-150"
+              className="group flex flex-col gap-2 p-2.5 lg:p-3 bg-gray-50 rounded-lg hover:bg-blue-50 hover:border hover:border-blue-200 transition-all duration-150"
             >
-              <div
-                className="flex items-center gap-3 flex-1 min-w-0 cursor-pointer"
-                onClick={() => navigate(`/profile/${member.memberId}`)}
-              >
-                {/* 프로필 이미지 */}
-                <img
-                  src={member.memberImageUrl || "/assets/images/user.png"}
-                  alt={member.memberName}
-                  className="object-cover w-10 h-10 lg:w-11 lg:h-11 border-2 border-white rounded-full flex-shrink-0 shadow-sm group-hover:border-blue-200 transition-colors"
-                />
+              {/* 상단: 프로필 이미지 + 기본 정보 + 팔로우 버튼 */}
+              <div className="flex items-center gap-3">
+                <div
+                  className="flex items-center gap-3 flex-1 min-w-0 cursor-pointer"
+                  onClick={() => navigate(`/profile/${member.memberId}`)}
+                >
+                  {/* 프로필 이미지 */}
+                  <img
+                    src={member.memberImageUrl || "/assets/images/user.png"}
+                    alt={member.memberName}
+                    className="object-cover w-10 h-10 lg:w-11 lg:h-11 border-2 border-white rounded-full flex-shrink-0 shadow-sm group-hover:border-blue-200 transition-colors"
+                  />
 
-                {/* 회원 정보 */}
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-gray-900 truncate group-hover:text-[#002F6C] transition-colors">
-                    {member.memberName}
-                  </p>
-                  {member.memberDepartmentResponseDtoList &&
-                    member.memberDepartmentResponseDtoList.length > 0 && (
-                      <p className="text-xs text-gray-600 truncate">
-                        {member.memberDepartmentResponseDtoList[0].departmentName}
-                      </p>
-                    )}
-
-                  {/* 매칭 정보 */}
-                  <div className="flex items-center gap-2 mt-0.5">
-                    {matchCount !== undefined && matchCount > 0 && (
-                      <span className="text-xs text-[#002F6C] font-medium">
-                        💙 {matchCount}
-                      </span>
-                    )}
-                    {stackMatchCount !== undefined && stackMatchCount > 0 && (
-                      <span className="text-xs text-[#002F6C] font-medium">
-                        💻 {stackMatchCount}
-                      </span>
-                    )}
-                    {member.followerCount !== undefined && member.followerCount > 0 && (
-                      <span className="text-xs text-gray-500">
-                        팔로워 {member.followerCount}
-                      </span>
-                    )}
+                  {/* 회원 정보 */}
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-gray-900 truncate group-hover:text-[#002F6C] transition-colors">
+                      {member.memberName}
+                    </p>
+                    {member.memberDepartmentResponseDtoList &&
+                      member.memberDepartmentResponseDtoList.length > 0 && (
+                        <p className="text-xs text-gray-600 truncate">
+                          {member.memberDepartmentResponseDtoList[0].departmentName}
+                        </p>
+                      )}
                   </div>
                 </div>
+
+                {/* 팔로우 버튼 */}
+                {!isOwnProfile && (
+                  <button
+                    onClick={(e) => handleFollowToggle(e, member.memberId)}
+                    disabled={isFollowLoading || isCheckingFollows}
+                    className={`px-2.5 py-1 text-xs font-semibold rounded-lg transition-colors whitespace-nowrap flex-shrink-0 ${
+                      isFollowing
+                        ? "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                        : "bg-[#002F6C] text-white hover:bg-[#001f4d]"
+                    } disabled:opacity-50 disabled:cursor-not-allowed`}
+                  >
+                    {isCheckingFollows
+                      ? "..."
+                      : isFollowLoading
+                      ? "처리중"
+                      : isFollowing
+                      ? "팔로잉"
+                      : "팔로우"}
+                  </button>
+                )}
               </div>
 
-              {/* 팔로우 버튼 */}
-              {!isOwnProfile && (
+              {/* 매칭 정보 & 팔로워 수 */}
+              <div className="flex items-center justify-between px-0.5">
+                <div className="flex items-center gap-2">
+                  {matchCount !== undefined && matchCount > 0 && (
+                    <span className="text-xs text-[#002F6C] font-medium">
+                      💙 {matchCount}개 일치
+                    </span>
+                  )}
+                  {stackMatchCount !== undefined && stackMatchCount > 0 && (
+                    <span className="text-xs text-[#002F6C] font-medium">
+                      💻 {stackMatchCount}개 일치
+                    </span>
+                  )}
+                </div>
+                {member.followerCount !== undefined && (
+                  <span className="text-xs text-gray-500">
+                    팔로워 {member.followerCount}명
+                  </span>
+                )}
+              </div>
+
+              {/* 펼치기 버튼 */}
+              {(member.memberIntroduce ||
+                (member.memberInterestResponseDtoList && member.memberInterestResponseDtoList.length > 0) ||
+                (member.memberTechStackResponseDtoList && member.memberTechStackResponseDtoList.length > 0)) && (
                 <button
-                  onClick={(e) => handleFollowToggle(e, member.memberId)}
-                  disabled={isFollowLoading || isCheckingFollows}
-                  className={`px-2.5 py-1 text-xs font-semibold rounded-lg transition-colors whitespace-nowrap flex-shrink-0 ${
-                    isFollowing
-                      ? "bg-gray-200 text-gray-700 hover:bg-gray-300"
-                      : "bg-[#002F6C] text-white hover:bg-[#001f4d]"
-                  } disabled:opacity-50 disabled:cursor-not-allowed`}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    toggleExpand(member.memberId);
+                  }}
+                  className="text-xs text-[#002F6C] hover:text-[#001f4d] font-medium px-0.5 text-left transition-colors"
                 >
-                  {isCheckingFollows
-                    ? "..."
-                    : isFollowLoading
-                    ? "처리중"
-                    : isFollowing
-                    ? "팔로잉"
-                    : "팔로우"}
+                  {isExpanded ? "▼ 접기" : "▶ 상세정보 보기"}
                 </button>
+              )}
+
+              {/* 상세 정보 (펼쳤을 때만 표시) */}
+              {isExpanded && (
+                <div className="space-y-2 pt-1 border-t border-gray-200">
+                  {/* 자기소개 */}
+                  {member.memberIntroduce && (
+                    <p className="text-xs text-gray-600 line-clamp-2 leading-relaxed px-0.5">
+                      {member.memberIntroduce}
+                    </p>
+                  )}
+
+                  {/* 관심분야 태그 */}
+                  {member.memberInterestResponseDtoList &&
+                    member.memberInterestResponseDtoList.length > 0 && (
+                      <div className="flex flex-wrap gap-1.5 items-center px-0.5">
+                        <span className="text-xs text-gray-500 font-medium">💙</span>
+                        {member.memberInterestResponseDtoList.slice(0, 3).map((interest) => (
+                          <span
+                            key={interest.interestId}
+                            className="px-1.5 py-0.5 text-xs bg-blue-50 text-[#002F6C] border border-blue-200 rounded"
+                          >
+                            {interest.interestName}
+                          </span>
+                        ))}
+                        {member.memberInterestResponseDtoList.length > 3 && (
+                          <span className="text-xs text-gray-500">
+                            +{member.memberInterestResponseDtoList.length - 3}
+                          </span>
+                        )}
+                      </div>
+                    )}
+
+                  {/* 기술 스택 */}
+                  {member.memberTechStackResponseDtoList &&
+                    member.memberTechStackResponseDtoList.length > 0 && (
+                      <div className="flex flex-wrap gap-1.5 items-center px-0.5">
+                        <span className="text-xs text-gray-500 font-medium">💻</span>
+                        {member.memberTechStackResponseDtoList.slice(0, 3).map((stack) => {
+                          const colorClass =
+                            techColorMap[stack.techStackName] ||
+                            "bg-gray-200 text-gray-800";
+                          return (
+                            <span
+                              key={stack.techStackId}
+                              className={`px-1.5 py-0.5 text-xs rounded ${colorClass}`}
+                            >
+                              {stack.techStackName}
+                            </span>
+                          );
+                        })}
+                        {member.memberTechStackResponseDtoList.length > 3 && (
+                          <span className="text-xs text-gray-500">
+                            +{member.memberTechStackResponseDtoList.length - 3}
+                          </span>
+                        )}
+                      </div>
+                    )}
+                </div>
               )}
             </div>
           );

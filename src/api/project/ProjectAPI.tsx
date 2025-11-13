@@ -8,6 +8,10 @@ import {
   DeleteProjectResponse,
   ProjectApplyRequest,
   ProjectApplyResponse,
+  DraftProject,
+  ProjectStatus,
+  UpdateProjectStatusRequest,
+  TechStack,
 } from "../../types/api/project-board";
 
 // =========================================
@@ -23,27 +27,28 @@ export const createProjectPost = async (
 };
 
 // 프로젝트 임시저장 (초안 저장) -> 추가 예정
-export const saveDraftProject = async (payload: Partial<CreateProjectPayload>) => {
+export const saveDraftProject = async (
+  payload: Partial<CreateProjectPayload>
+): Promise<DraftProject> => {
   const response = await API.post("/api/v1/projects/draft", payload);
   return response.data;
 };
 
 // 임시저장된 프로젝트 목록 조회 -> 추가 예정
-export const getDraftProjects = async () => {
+export const getDraftProjects = async (): Promise<DraftProject[]> => {
   const response = await API.get("/api/v1/projects/drafts");
   return response.data;
 };
 
 // 임시저장된 프로젝트 불러오기 -> 추가 예정
-export const getDraftProject = async (draftId: number) => {
+export const getDraftProject = async (draftId: number): Promise<DraftProject> => {
   const response = await API.get(`/api/v1/projects/drafts/${draftId}`);
   return response.data;
 };
 
 // 임시저장 삭제 -> 추가 예정
-export const deleteDraftProject = async (draftId: number) => {
-  const response = await API.delete(`/api/v1/projects/drafts/${draftId}`);
-  return response.data;
+export const deleteDraftProject = async (draftId: number): Promise<void> => {
+  await API.delete(`/api/v1/projects/drafts/${draftId}`);
 };
 
 // =========================================
@@ -138,11 +143,11 @@ export const updateProject = async (
 
 // 프로젝트 상태 변경 (진행중/완료/취소) -> 추가 예정
 export const updateProjectStatus = async (
-  projectId: number, 
-  status: 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED'
-) => {
-  const response = await API.patch(`/api/v1/projects/${projectId}/status`, { status });
-  return response.data;
+  projectId: number,
+  status: ProjectStatus
+): Promise<void> => {
+  const payload: UpdateProjectStatusRequest = { status };
+  await API.patch(`/api/v1/projects/${projectId}/status`, payload);
 };
 
 // =========================================
@@ -150,7 +155,9 @@ export const updateProjectStatus = async (
 // =========================================
 
 // ✅ 프로젝트 모집글에 지원
-export const applyToProject = async (payload: ProjectApplyRequest) => {
+export const applyToProject = async (
+  payload: ProjectApplyRequest
+): Promise<ProjectApplyResponse> => {
   const response = await API.post(
     `/api/v1/projects/${payload.projectId}/apply`,
     { part: payload.part },
@@ -179,6 +186,18 @@ export const updateApplicationStatus = async (
 ): Promise<void> => {
   await API.post(
     `/api/v1/projects/${projectId}/applications/${applicationId}/${status}`,
+    {},
+    { headers: { skipAuth: false } }
+  );
+};
+
+// ✅ 지원 취소
+export const cancelApplication = async (
+  projectId: number,
+  applicationId: number
+): Promise<void> => {
+  await API.delete(
+    `/api/v1/projects/${projectId}/applications/${applicationId}`,
     { headers: { skipAuth: false } }
   );
 };
@@ -188,23 +207,26 @@ export const updateApplicationStatus = async (
 // =========================================
 
 // 기술 스택 목록 조회 (GET)
-export const getTech = async () => {
+export const getTechStacks = async (): Promise<TechStack[]> => {
   const res = await API.get("/api/v1/tech-stacks", {
     headers: { skipAuth: true },
   });
   return res.data;
 };
 
-// 프로젝트 신고 -> 추가 예정
-// export const reportProject = async (
-//   projectId: number,
-//   reason: string,
-//   description?: string
-// ) => {
-//   const response = await API.post(`/api/v1/projects/${projectId}/report`, {
-//     reason,
-//     description
-//   });
-//   return response.data;
-// };
+// ✅ getTech의 신규 이름 (기존 호환성 유지)
+export const getTech = async (): Promise<TechStack[]> => {
+  return getTechStacks();
+};
 
+// 프로젝트 신고 -> 추가 예정
+export const reportProject = async (
+  projectId: number,
+  reason: string,
+  description?: string
+): Promise<void> => {
+  await API.post(`/api/v1/projects/${projectId}/report`, {
+    reason,
+    description,
+  });
+};

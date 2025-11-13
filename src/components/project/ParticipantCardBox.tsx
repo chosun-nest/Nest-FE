@@ -129,5 +129,6 @@ export default function ParticipantCardBox({
         참여 {project.currentNumberOfMembers} / {project.maximumNumberOfMembers}
       </div>
     </div>
-  );
+  ); 
+
 }
