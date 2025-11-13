@@ -30,6 +30,7 @@ export default function MatchingUserCard({
   const [isFollowing, setIsFollowing] = useState(false);
   const [isFollowLoading, setIsFollowLoading] = useState(false);
   const [isCheckingFollow, setIsCheckingFollow] = useState(true);
+  const [isExpanded, setIsExpanded] = useState(false);
 
   // 본인 여부 확인
   const isOwnProfile = currentMemberId ? Number(currentMemberId) === member.memberId : false;
@@ -92,24 +93,30 @@ export default function MatchingUserCard({
   const renderMatchBadge = () => {
     if (!showMatchInfo) return null;
 
-    if ("matchCount" in member && member.matchCount > 0) {
-      return (
-        <span className="text-xs font-medium text-[#002F6C] bg-blue-100 px-2 py-1 rounded">
-          💙 {member.matchCount}개 일치
-        </span>
-      );
+    if ("matchCount" in member) {
+      const matchCount = member.matchCount as number;
+      if (matchCount > 0) {
+        return (
+          <span className="text-xs font-medium text-[#002F6C] bg-blue-100 px-2 py-1 rounded">
+            💙 {matchCount}개 일치
+          </span>
+        );
+      }
     }
 
-    if ("stackMatchCount" in member && member.stackMatchCount > 0) {
-      return (
-        <span className="text-xs font-medium text-[#002F6C] bg-blue-100 px-2 py-1 rounded">
-          💻 {member.stackMatchCount}개 일치
-        </span>
-      );
+    if ("stackMatchCount" in member) {
+      const stackMatchCount = member.stackMatchCount as number;
+      if (stackMatchCount > 0) {
+        return (
+          <span className="text-xs font-medium text-[#002F6C] bg-blue-100 px-2 py-1 rounded">
+            💻 {stackMatchCount}개 일치
+          </span>
+        );
+      }
     }
 
     if ("joinedDate" in member) {
-      const joinedDate = new Date(member.joinedDate);
+      const joinedDate = new Date(member.joinedDate as string);
       const today = new Date();
       const diffTime = Math.abs(today.getTime() - joinedDate.getTime());
       const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
@@ -124,12 +131,12 @@ export default function MatchingUserCard({
   };
 
   return (
-    <div
-      className="group p-4 bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-lg hover:border-blue-300 transition-all duration-200 cursor-pointer"
-      onClick={() => navigate(`/profile/${member.memberId}`)}
-    >
+    <div className="group p-4 bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-lg hover:border-blue-300 transition-all duration-200">
       {/* 상단: 프로필 이미지 + 이름/학과 + 팔로우 버튼 */}
-      <div className="flex items-center gap-3 mb-3">
+      <div
+        className="flex items-center gap-3 mb-3 cursor-pointer"
+        onClick={() => navigate(`/profile/${member.memberId}`)}
+      >
         <img
           src={member.memberImageUrl || "/assets/images/user.png"}
           alt={member.memberName}
@@ -170,7 +177,7 @@ export default function MatchingUserCard({
       </div>
 
       {/* 중단: 매칭 뱃지 + 팔로워 수 */}
-      <div className="flex items-center justify-between mb-3 pb-2 border-b border-gray-100">
+      <div className="flex items-center justify-between mb-3 pb-3 border-b border-gray-100">
         <div className="flex items-center gap-2">
           {renderMatchBadge()}
         </div>
@@ -179,60 +186,80 @@ export default function MatchingUserCard({
         </span>
       </div>
 
-      {/* 한 줄 소개 */}
-      {member.memberIntroduce && (
-        <p className="text-xs text-gray-600 line-clamp-2 mb-3 leading-relaxed">
-          {member.memberIntroduce}
-        </p>
+      {/* 펼치기 버튼 */}
+      {(member.memberIntroduce ||
+        (member.memberInterestResponseDtoList && member.memberInterestResponseDtoList.length > 0) ||
+        (member.memberTechStackResponseDtoList && member.memberTechStackResponseDtoList.length > 0)) && (
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            setIsExpanded(!isExpanded);
+          }}
+          className="text-xs text-[#002F6C] hover:text-[#001f4d] font-medium mb-3 transition-colors"
+        >
+          {isExpanded ? "▼ 접기" : "▶ 상세정보 보기"}
+        </button>
       )}
 
-      {/* 하단: 관심태그 & 기술스택 */}
-      <div className="space-y-2">
-        {member.memberInterestResponseDtoList &&
-          member.memberInterestResponseDtoList.length > 0 && (
-            <div className="flex flex-wrap gap-1.5 items-center">
-              <span className="text-xs text-gray-500 font-medium">💙</span>
-              {member.memberInterestResponseDtoList.slice(0, 3).map((interest) => (
-                <span
-                  key={interest.interestId}
-                  className="px-2 py-0.5 text-xs bg-blue-50 text-[#002F6C] border border-blue-200 rounded"
-                >
-                  {interest.interestName}
-                </span>
-              ))}
-              {member.memberInterestResponseDtoList.length > 3 && (
-                <span className="text-xs text-gray-500">
-                  +{member.memberInterestResponseDtoList.length - 3}
-                </span>
-              )}
-            </div>
+      {/* 상세 정보 (펼쳤을 때만 표시) */}
+      {isExpanded && (
+        <div className="space-y-2 pt-2 border-t border-gray-100">
+          {/* 한 줄 소개 */}
+          {member.memberIntroduce && (
+            <p className="text-xs text-gray-600 line-clamp-2 leading-relaxed">
+              {member.memberIntroduce}
+            </p>
           )}
 
-        {member.memberTechStackResponseDtoList &&
-          member.memberTechStackResponseDtoList.length > 0 && (
-            <div className="flex flex-wrap gap-1.5 items-center">
-              <span className="text-xs text-gray-500 font-medium">💻</span>
-              {member.memberTechStackResponseDtoList.slice(0, 3).map((stack) => {
-                const colorClass =
-                  techColorMap[stack.techStackName] ||
-                  "bg-gray-200 text-gray-800";
-                return (
-                  <span
-                    key={stack.techStackId}
-                    className={`px-2 py-0.5 text-xs rounded ${colorClass}`}
-                  >
-                    {stack.techStackName}
-                  </span>
-                );
-              })}
-              {member.memberTechStackResponseDtoList.length > 3 && (
-                <span className="text-xs text-gray-500">
-                  +{member.memberTechStackResponseDtoList.length - 3}
-                </span>
+          {/* 하단: 관심태그 & 기술스택 */}
+          <div className="space-y-2">
+            {member.memberInterestResponseDtoList &&
+              member.memberInterestResponseDtoList.length > 0 && (
+                <div className="flex flex-wrap gap-1.5 items-center">
+                  <span className="text-xs text-gray-500 font-medium">💙</span>
+                  {member.memberInterestResponseDtoList.slice(0, 3).map((interest) => (
+                    <span
+                      key={interest.interestId}
+                      className="px-2 py-0.5 text-xs bg-blue-50 text-[#002F6C] border border-blue-200 rounded"
+                    >
+                      {interest.interestName}
+                    </span>
+                  ))}
+                  {member.memberInterestResponseDtoList.length > 3 && (
+                    <span className="text-xs text-gray-500">
+                      +{member.memberInterestResponseDtoList.length - 3}
+                    </span>
+                  )}
+                </div>
               )}
-            </div>
-          )}
-      </div>
+
+            {member.memberTechStackResponseDtoList &&
+              member.memberTechStackResponseDtoList.length > 0 && (
+                <div className="flex flex-wrap gap-1.5 items-center">
+                  <span className="text-xs text-gray-500 font-medium">💻</span>
+                  {member.memberTechStackResponseDtoList.slice(0, 3).map((stack) => {
+                    const colorClass =
+                      techColorMap[stack.techStackName] ||
+                      "bg-gray-200 text-gray-800";
+                    return (
+                      <span
+                        key={stack.techStackId}
+                        className={`px-2 py-0.5 text-xs rounded ${colorClass}`}
+                      >
+                        {stack.techStackName}
+                      </span>
+                    );
+                  })}
+                  {member.memberTechStackResponseDtoList.length > 3 && (
+                    <span className="text-xs text-gray-500">
+                      +{member.memberTechStackResponseDtoList.length - 3}
+                    </span>
+                  )}
+                </div>
+              )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
