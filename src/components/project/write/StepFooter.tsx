@@ -10,6 +10,7 @@ interface StepFooterProps {
   onComplete: () => Promise<void> | void;
   onSaveDraft?: () => void;
   onPreview?: () => void;
+  isEditMode?: boolean;
 }
 
 export default function StepFooter({
@@ -21,6 +22,7 @@ export default function StepFooter({
   onComplete: onSubmit,
   onSaveDraft,
   onPreview,
+  isEditMode = false,
 }: StepFooterProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -104,10 +106,10 @@ export default function StepFooter({
                       d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                     />
                   </svg>
-                  등록 중...
+                  {isEditMode ? "수정 중..." : "등록 중..."}
                 </>
               ) : (
-                "등록하기"
+                isEditMode ? "수정하기" : "등록하기"
               )}
             </button>
           ) : (

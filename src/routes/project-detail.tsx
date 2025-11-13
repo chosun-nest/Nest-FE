@@ -93,19 +93,10 @@ export default function ProjectDetail() {
   const handleEdit = () => {
     if (!project) return;
 
-    const partCounts: Record<string, number> = {};
-    project.projectMembers.forEach((member) => {
-      if (member.part) {
-        partCounts[member.part] = (partCounts[member.part] || 0) + 1;
-      }
-    });
-
+    // project 객체에 이미 parts가 있으므로 그대로 전달
     navigate("/project-write", {
       state: {
-        project: {
-          ...project,
-          partCounts,
-        },
+        project: project,
       },
     });
   };

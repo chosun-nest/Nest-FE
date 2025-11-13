@@ -1,15 +1,16 @@
 // 프로젝트 등록 페이지(프로젝트 글쓰기 페이지)
 import { useState, useRef, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import StepSidebar from "../components/project/write/StepSidebar";
 import { StepContent } from "../components/project/write/StepContent";
 import StepFooter from "../components/project/write/StepFooter";
 import ProjectWriteComplete from "./project-write-complete";
 import Navbar from "../components/layout/navbar";
 import BoardTypeSelector from "../components/board/write/BoardTypeSelector";
-import { createProjectPost } from "../api/project/ProjectAPI";
+import { createProjectPost, updateProject } from "../api/project/ProjectAPI";
 import Modal from "../components/common/modal";
 import { ModalContent } from "../types/modal";
+import type { ProjectDetail } from "../types/api/project-board";
 
 // 역할 타입 정의
 export type ProjectRole = "FRONTEND" | "BACKEND" | "PM" | "DESIGN" | "AI" | "ETC";
@@ -51,11 +52,35 @@ const AUTOSAVE_INTERVAL = 30000; // 30초마다 자동저장
 
 export default function ProjectWrite() {
   const navigate = useNavigate();
+  const location = useLocation();
   const navbarRef = useRef<HTMLDivElement>(null);
+
+  // 수정 모드 확인
+  const editMode = location.state?.project as ProjectDetail | undefined;
+  const isEditMode = !!editMode;
 
   const [navHeight, setNavHeight] = useState(0);
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState<ProjectFormData>(() => {
+    // 수정 모드인 경우 기존 데이터 로드
+    if (editMode) {
+      const roles: { role: ProjectRole; count: number }[] = [];
+
+      // parts 객체를 roles 배열로 변환
+      Object.entries(editMode.parts || {}).forEach(([role, count]) => {
+        roles.push({ role: role as ProjectRole, count });
+      });
+
+      return {
+        title: editMode.projectTitle,
+        category: "개발",
+        description: editMode.projectDescription,
+        roles,
+        myRole: editMode.creatorPart as ProjectRole,
+        tags: editMode.tags || [],
+      };
+    }
+
     // 로컬스토리지에서 자동저장된 데이터 복원
     const saved = localStorage.getItem(AUTOSAVE_KEY);
     if (saved) {
@@ -208,31 +233,54 @@ export default function ProjectWrite() {
         0
       );
 
-      const payload = {
-        projectTitle: formData.title,
-        projectDescription: formData.description,
-        isRecruiting: true,
-        tags: formData.tags,
-        parts, // ✅ partCounts → parts로 변경
-        creatorPart: formData.myRole,
-        creatorRole: "LEADER",
-        maximumNumberOfMembers,
-        // API 미지원 필드는 전송하지 않음
-        // deadline: formData.deadline,
-        // startDate: formData.startDate,
-        // endDate: formData.endDate,
-        // meetingType: formData.meetingType,
-      };
+      if (isEditMode && editMode) {
+        // 수정 모드
+        const updatePayload = {
+          projectTitle: formData.title,
+          projectDescription: formData.description,
+          isRecruiting: editMode.isRecruiting, // 기존 상태 유지
+          tags: formData.tags,
+          parts,
+          imageUrls: null,
+          membersToRemove: [],
+        };
 
-      await createProjectPost(payload);
-      // 성공 시 로컬스토리지 자동저장 데이터 삭제
-      localStorage.removeItem(AUTOSAVE_KEY);
-      setStep(3); // 완료 페이지로 이동
+        await updateProject(editMode.projectId, updatePayload);
+        setModalContent({
+          title: "수정 완료",
+          message: "프로젝트가 성공적으로 수정되었습니다.",
+          type: "info",
+          onClose: () => {
+            setShowModal(false);
+            navigate(`/project/${editMode.projectId}`);
+          },
+        });
+        setShowModal(true);
+      } else {
+        // 신규 등록 모드
+        const payload = {
+          projectTitle: formData.title,
+          projectDescription: formData.description,
+          isRecruiting: true,
+          tags: formData.tags,
+          parts,
+          creatorPart: formData.myRole,
+          creatorRole: "LEADER",
+          maximumNumberOfMembers,
+        };
+
+        await createProjectPost(payload);
+        // 성공 시 로컬스토리지 자동저장 데이터 삭제
+        localStorage.removeItem(AUTOSAVE_KEY);
+        setStep(3); // 완료 페이지로 이동
+      }
     } catch (error) {
-      console.error("프로젝트 등록 실패:", error);
+      console.error(isEditMode ? "프로젝트 수정 실패:" : "프로젝트 등록 실패:", error);
       setModalContent({
-        title: "등록 실패",
-        message: "프로젝트 등록에 실패했습니다. 다시 시도해주세요.",
+        title: isEditMode ? "수정 실패" : "등록 실패",
+        message: isEditMode
+          ? "프로젝트 수정에 실패했습니다. 다시 시도해주세요."
+          : "프로젝트 등록에 실패했습니다. 다시 시도해주세요.",
         type: "error",
       });
       setShowModal(true);
@@ -341,11 +389,22 @@ export default function ProjectWrite() {
         {/* 게시판 선택 드롭 다운 제목 */}
         <BoardTypeSelector boardType="projects" />
 
+        {/* 수정 모드 표시 */}
+        {isEditMode && (
+          <div className="mb-4 p-3 bg-amber-50 border-l-4 border-amber-500 rounded">
+            <p className="text-sm font-medium text-amber-800">
+              ✏️ 프로젝트 수정 모드입니다.
+            </p>
+          </div>
+        )}
+
         {/* 진행률 표시 */}
         {step < 3 && (
           <div className="mb-6">
             <div className="flex justify-between items-center mb-2">
-              <span className="text-sm font-medium text-gray-700">작성 진행률</span>
+              <span className="text-sm font-medium text-gray-700">
+                {isEditMode ? "수정" : "작성"} 진행률
+              </span>
               <span className="text-sm font-bold text-blue-600">{getProgress()}%</span>
             </div>
             <div className="w-full bg-gray-200 rounded-full h-2">
@@ -385,8 +444,9 @@ export default function ProjectWrite() {
                   onNext={goNext}
                   onCancel={handleCancel}
                   onComplete={handleSubmit}
-                  onSaveDraft={handleSaveDraft}
+                  onSaveDraft={isEditMode ? undefined : handleSaveDraft}
                   onPreview={() => setShowPreview(true)}
+                  isEditMode={isEditMode}
                 />
               </>
             )}
