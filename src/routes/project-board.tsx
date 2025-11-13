@@ -97,67 +97,74 @@ export default function ProjectBoard() {
     <div
       className={`mx-auto p-4 pt-24 ${isMobile ? "max-w-full" : "max-w-4xl"}`}
     >
-      {/* 필터 버튼 */}
-      <div className="flex flex-col pb-2 mb-4 border-b border-gray-300 md:flex-row md:items-center md:justify-between">
-        <h1 className="text-2xl font-bold text-[#00256c] mb-2 md:mb-0">
-          프로젝트 모집 게시판
-        </h1>
-        <div className="flex gap-2">
-          {(["ALL", "RECRUITING", "COMPLETED"] as FilterType[]).map((type) => (
-            <button
-              key={type}
-              onClick={() => {
-                setFilterType(type);
+      {/* 헤더 영역 */}
+      <div className="px-1 mb-6">
+        {/* 제목과 필터 버튼 */}
+        <div className="px-1 mb-3">
+          <div className="flex items-center justify-between">
+            <h2 className="text-2xl font-bold text-[#00256c]">프로젝트 모집 게시판</h2>
+
+            {/* 필터 버튼 */}
+            <div className="flex gap-2">
+              {(["ALL", "RECRUITING", "COMPLETED"] as FilterType[]).map((type) => (
+                <button
+                  key={type}
+                  onClick={() => {
+                    setFilterType(type);
+                    setCurrentPage(1);
+                  }}
+                  className={`px-3 py-1 text-sm rounded border font-semibold ${
+                    filterType === type
+                      ? "bg-blue-500 text-white"
+                      : "bg-white text-gray-700 hover:bg-gray-100"
+                  }`}
+                >
+                  {type === "ALL"
+                    ? "전체"
+                    : type === "RECRUITING"
+                      ? "모집중"
+                      : "모집완료"}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* 구분선 */}
+        <hr className="mb-4 border-t border-gray-300" />
+
+        {/* 게시물 수, 검색창, 태그 버튼 */}
+        <div className="flex flex-col gap-2 mb-6 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-sm text-gray-700">
+            총 <strong>{totalCount}</strong>개의 게시물이 있습니다.
+          </p>
+
+          <div className="flex gap-2">
+            <input
+              type="text"
+              placeholder="제목 또는 내용 검색"
+              value={searchKeyword}
+              onChange={(e) => {
+                setSearchKeyword(e.target.value);
                 setCurrentPage(1);
               }}
-              className={`px-3 py-1 text-sm rounded border font-semibold ${
-                filterType === type
-                  ? "bg-blue-500 text-white"
-                  : "bg-white text-gray-700 hover:bg-gray-100"
-              }`}
+              className="px-3 py-2 text-sm border rounded w-full sm:w-[300px]"
+            />
+            <button
+              onClick={() => setShowFilterModal(true)}
+              className="px-3 py-2 text-sm text-gray-700 bg-gray-100 border rounded hover:bg-gray-200"
             >
-              {type === "ALL"
-                ? "전체"
-                : type === "RECRUITING"
-                  ? "모집중"
-                  : "모집완료"}
+              🔍 태그 선택
             </button>
-          ))}
+          </div>
         </div>
-      </div>
 
-      {/* 검색창 & 태그 선택 버튼 */}
-      <div className="flex flex-col gap-2 mb-4 sm:flex-row sm:items-center sm:justify-between">
-        <p className="text-sm text-gray-600">
-          총 <strong>{totalCount}</strong>개의 게시물이 있습니다.
-        </p>
-        <div className="flex w-full gap-2 sm:w-auto">
-          <input
-            type="text"
-            placeholder="제목 또는 내용 검색"
-            value={searchKeyword}
-            onChange={(e) => {
-              setSearchKeyword(e.target.value);
-              setCurrentPage(1);
-            }}
-            className="px-3 py-2 text-sm border rounded w-full sm:w-[300px]"
-          />
-          <button
-            onClick={() => setShowFilterModal(true)}
-            className="px-3 py-2 text-sm text-gray-700 bg-gray-100 border rounded hover:bg-gray-200"
-          >
-            🔍 태그 선택
-          </button>
-        </div>
-      </div>
-
-      {/* 선택된 태그 */}
-      {selectedTags.length > 0 && (
+        {/* 선택된 태그 */}
         <SelectedTagList
           selectedTags={selectedTags}
           onRemoveTag={removeSelectedTag}
         />
-      )}
+      </div>
 
       {/* 태그 모달 */}
       {showFilterModal && (
@@ -219,9 +226,17 @@ export default function ProjectBoard() {
                 <span>
                   {project.author.name} · {project.createdAt}
                 </span>
-                <span>
-                  조회수 {project.viewCount} · 댓글수 {project.commentCount}
-                </span>
+                <div className="flex items-center gap-3">
+                  <span className="flex items-center gap-1">
+                    👁️ {project.viewCount}
+                  </span>
+                  <span className="flex items-center gap-1">
+                    💬 {project.commentCount}
+                  </span>
+                  <span className="flex items-center gap-1">
+                    👥 {project.currentNumberOfMembers}/{project.maximumNumberOfMembers}
+                  </span>
+                </div>
               </div>
             </div>
           ))}
@@ -229,21 +244,89 @@ export default function ProjectBoard() {
       )}
 
       {/* 페이지네이션 */}
-      <div className="flex justify-center mt-6 space-x-2">
-        {Array.from({ length: totalPages }, (_, i) => (
+      {totalPages > 0 && (
+        <div className="flex items-center justify-center gap-2 mt-6">
+          {/* 이전 버튼 */}
           <button
-            key={i + 1}
-            onClick={() => handlePageClick(i + 1)}
-            className={`px-3 py-1 rounded border ${
-              currentPage === i + 1
-                ? "bg-blue-500 text-white"
-                : "bg-white text-gray-700"
-            }`}
+            onClick={() => handlePageClick(currentPage - 1)}
+            disabled={currentPage === 1}
+            className={`px-3 py-2 text-sm font-medium rounded border transition-colors
+              ${currentPage === 1
+                ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                : "bg-white text-gray-700 hover:bg-gray-50"
+              }`}
           >
-            {i + 1}
+            ← 이전
           </button>
-        ))}
-      </div>
+
+          {/* 페이지 번호 */}
+          <div className="flex gap-1">
+            {Array.from({ length: totalPages }, (_, i) => {
+              const pageNum = i + 1;
+              // 모바일에서는 현재 페이지 주변만 표시
+              if (isMobile) {
+                if (
+                  pageNum === 1 ||
+                  pageNum === totalPages ||
+                  (pageNum >= currentPage - 1 && pageNum <= currentPage + 1)
+                ) {
+                  return (
+                    <button
+                      key={pageNum}
+                      onClick={() => handlePageClick(pageNum)}
+                      className={`px-3 py-2 text-sm font-medium rounded border transition-colors
+                        ${currentPage === pageNum
+                          ? "bg-blue-500 text-white border-blue-500"
+                          : "bg-white text-gray-700 hover:bg-gray-50"
+                        }`}
+                    >
+                      {pageNum}
+                    </button>
+                  );
+                } else if (
+                  pageNum === currentPage - 2 ||
+                  pageNum === currentPage + 2
+                ) {
+                  return (
+                    <span key={pageNum} className="px-2 py-2 text-gray-400">
+                      ...
+                    </span>
+                  );
+                }
+                return null;
+              }
+
+              // 웹에서는 모든 페이지 표시
+              return (
+                <button
+                  key={pageNum}
+                  onClick={() => handlePageClick(pageNum)}
+                  className={`px-3 py-2 text-sm font-medium rounded border transition-colors
+                    ${currentPage === pageNum
+                      ? "bg-blue-500 text-white border-blue-500"
+                      : "bg-white text-gray-700 hover:bg-gray-50"
+                    }`}
+                >
+                  {pageNum}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* 다음 버튼 */}
+          <button
+            onClick={() => handlePageClick(currentPage + 1)}
+            disabled={currentPage === totalPages}
+            className={`px-3 py-2 text-sm font-medium rounded border transition-colors
+              ${currentPage === totalPages
+                ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                : "bg-white text-gray-700 hover:bg-gray-50"
+              }`}
+          >
+            다음 →
+          </button>
+        </div>
+      )}
 
       <BoardWriteButton />
     </div>
