@@ -23,6 +23,7 @@ import InterestWrite from "./routes/interests-write"; //yeong-eun
 import ProjectWrite from "./routes/project-write"; //yeong-eun
 
 import MatchingBoard from "./routes/matching-board"; //yeong-eun
+import MatchingDetail from "./routes/matching-detail"; //yeong-eun
 
 import GlobalBackdrop from "./components/easter/GlobalBackdrop";
 import { BackdropContext } from "./context/Backdropcontext";
@@ -97,6 +98,14 @@ const router = createBrowserRouter([
         element: (
           <ProtectedRoute>
             <MatchingBoard />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "matching/:sectionType",
+        element: (
+          <ProtectedRoute>
+            <MatchingDetail />
           </ProtectedRoute>
         ),
       },

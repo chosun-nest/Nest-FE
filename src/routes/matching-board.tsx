@@ -194,17 +194,32 @@ export default function MatchingBoard() {
           <MatchingSearch />
 
           {/* 그리드 레이아웃 (데스크톱) */}
-          <div className="hidden lg:grid lg:grid-cols-3 lg:gap-4 xl:gap-6 mb-8 lg:auto-rows-fr">
-            {/* 왼쪽 상단 - 관심사 기반 매칭 (2칸 차지) */}
-            <div className="lg:col-span-2 lg:row-span-1 xl:col-span-2">
+          <div className="hidden lg:grid lg:grid-cols-3 lg:gap-4 xl:gap-6 mb-8" style={{ gridAutoRows: '500px' }}>
+            {/* 왼쪽 상단 - 관심사 기반 매칭 */}
+            <div className="lg:col-span-1 lg:row-span-1">
               <MatchingSectionCard
                 title="나와 관심사가 비슷한 사람들"
                 icon="💙"
                 members={interestMembers}
                 isLoading={interestLoading}
                 error={interestError}
-                variant="large"
-                maxDisplay={4}
+                variant="medium"
+                maxDisplay={6}
+                sectionType="interest"
+              />
+            </div>
+
+            {/* 중앙 상단 - 기술 스택 매칭 */}
+            <div className="lg:col-span-1 lg:row-span-1">
+              <MatchingSectionCard
+                title="기술 스택이 맞는 개발자"
+                icon="💻"
+                members={techStackMembers}
+                isLoading={techStackLoading}
+                error={techStackError}
+                variant="medium"
+                maxDisplay={6}
+                sectionType="techStack"
               />
             </div>
 
@@ -217,25 +232,13 @@ export default function MatchingBoard() {
                 isLoading={popularLoading}
                 error={popularError}
                 variant="tall"
-                maxDisplay={7}
+                maxDisplay={12}
+                sectionType="popular"
               />
             </div>
 
-            {/* 왼쪽 하단 왼쪽 - 기술 스택 매칭 */}
-            <div className="lg:col-span-1">
-              <MatchingSectionCard
-                title="기술 스택이 맞는 개발자"
-                icon="💻"
-                members={techStackMembers}
-                isLoading={techStackLoading}
-                error={techStackError}
-                variant="medium"
-                maxDisplay={4}
-              />
-            </div>
-
-            {/* 왼쪽 하단 오른쪽 - 같은 학과 */}
-            <div className="lg:col-span-1">
+            {/* 왼쪽 하단 - 같은 학과 */}
+            <div className="lg:col-span-1 lg:row-span-1">
               <MatchingSectionCard
                 title="같은 학과의 동료들"
                 icon="🎓"
@@ -243,7 +246,22 @@ export default function MatchingBoard() {
                 isLoading={sameMajorLoading}
                 error={sameMajorError}
                 variant="medium"
-                maxDisplay={4}
+                maxDisplay={6}
+                sectionType="sameMajor"
+              />
+            </div>
+
+            {/* 중앙 하단 - 신규 회원 */}
+            <div className="lg:col-span-1 lg:row-span-1">
+              <MatchingSectionCard
+                title="새로 들어온 친구들"
+                icon="✨"
+                members={newMembers}
+                isLoading={newMembersLoading}
+                error={newMembersError}
+                variant="medium"
+                maxDisplay={6}
+                sectionType="newMembers"
               />
             </div>
           </div>
@@ -301,17 +319,6 @@ export default function MatchingBoard() {
             />
           </div>
 
-          {/* 추가 섹션 - 신규 회원 (데스크톱에서만 하단에 표시) */}
-          <div className="hidden lg:block">
-            <MatchingSection
-              title="새로 들어온 친구들"
-              icon="✨"
-              members={newMembers}
-              isLoading={newMembersLoading}
-              error={newMembersError}
-              showMatchInfo={true}
-            />
-          </div>
         </div>
       </div>
     </>
