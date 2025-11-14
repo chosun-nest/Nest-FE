@@ -87,7 +87,7 @@ export default function ProjectBoard() {
 
   return (
     <div
-      className={`mx-auto p-4 pt-24 ${isMobile ? "max-w-full" : "max-w-4xl"}`}
+      className={`mx-auto min-h-screen p-4 pt-24 bg-white ${isMobile ? "max-w-full" : "max-w-4xl"}`}
     >
       {/* 헤더 영역 */}
       <div className="px-1 mb-6">
