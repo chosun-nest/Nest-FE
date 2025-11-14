@@ -13,7 +13,7 @@ const steps = [
   "등록 완료"
 ];
 
-export default function StepSidebar({ currentStep, totalSteps, progress }: StepSidebarProps) {
+export default function StepSidebar({ currentStep, totalSteps: _totalSteps, progress }: StepSidebarProps) {
   return (
     <aside className="hidden md:block w-[200px] text-sm text-gray-600">
       <div className="sticky top-28">

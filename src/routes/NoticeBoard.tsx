@@ -3,6 +3,7 @@ import Navbar from "../components/layout/navbar";
 import NoticeBoardSearch from "../components/notice/NoticeBoardSearch";
 import NoticeDropdown from "../components/notice/NoticeDropdown";
 import NoticeCard from "../components/notice/NoticeCard";
+import Pagination from "../components/interests/board/Pagination";
 import { fetchNotices } from "../api/notices/NoticesAPI";  //API 연동
 
 export interface Notice {
@@ -61,11 +62,17 @@ export default function NoticeBoard() {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        console.log("📥 공지사항 조회 시작:", { category });
+
         if (category === "전체") {
           // 전체 데이터를 모두 가져온 후 프론트에서 페이지네이션
-            const results = await Promise.all(
-              CATEGORY_LIST.slice(1).map((cat) => 
-              fetchNotices(cat, 0, 400)) // 충분한 크기로 가져오기
+          const results = await Promise.all(
+            CATEGORY_LIST.slice(1).map(async (cat) => {
+              console.log(`  📡 API 호출: ${cat}`);
+              const result = await fetchNotices(cat, 0, 400);
+              console.log(`  ✅ 응답: ${cat} - ${result.notices?.length || 0}개`);
+              return result;
+            })
           );
 
           const merged = results.flatMap((res, i) =>
@@ -79,93 +86,69 @@ export default function NoticeBoard() {
             (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
           );
 
+          console.log("✅ 전체 공지:", sorted.length);
           setAllNotices(sorted);
           setTotalCount(sorted.length);
           setTotalPages(Math.ceil(sorted.length / noticesPerPage));
         } else {
-          const res = await fetchNotices(category, currentPage - 1, noticesPerPage);
-          const filtered = (res.notices || []).map((n) => ({
+          console.log(`📡 API 호출: ${category}, 전체 데이터 가져오기`);
+          // 특정 카테고리도 모든 데이터를 한 번에 가져와서 프론트에서 페이지네이션
+          const res = await fetchNotices(category, 0, 1000);
+          console.log(`✅ 응답:`, res);
+
+          const allCategoryNotices = (res.notices || []).map((n) => ({
             ...n,
             category: normalize(category), // 카테고리 공백 제거
           }));
 
-          setPagedNotices(filtered);
-
-          const totalElements = filtered.length;
-
-          setTotalCount(totalElements);
-          setTotalPages(Math.ceil(totalElements / noticesPerPage));
+          console.log(`✅ ${category} 전체 공지: ${allCategoryNotices.length}개`);
+          setPagedNotices(allCategoryNotices);
+          setTotalCount(allCategoryNotices.length);
+          setTotalPages(Math.ceil(allCategoryNotices.length / noticesPerPage));
         }
       } catch (err) {
         console.error("❌ 공지 불러오기 실패:", err);
+        console.error("❌ 에러 상세:", err);
       }
     };
 
     fetchData();
-  }, [category, currentPage]);
+    // currentPage는 의존성에서 제거 - 카테고리 변경시에만 API 호출
+  }, [category]);
 
 
-  const getCurrentNotices = (): Notice[] => {
-    if (category === "전체") {
-      const start = (currentPage - 1) * noticesPerPage;
-      return allNotices.slice(start, start + noticesPerPage);
-    } else {
-      return pagedNotices;
+  // 검색어로 필터링된 공지사항 목록 가져오기
+  const getFilteredNotices = (): Notice[] => {
+    const sourceNotices = category === "전체" ? allNotices : pagedNotices;
+
+    // 검색어가 없으면 전체 반환
+    if (!searchKeyword.trim()) {
+      return sourceNotices;
     }
-  };
 
-  // 페이지네이션 구현
-  const renderPagination = () => {
-    return (
-      <div className="flex items-center justify-center gap-2 mt-6">
-        {/* 이전 버튼 */}
-        <button
-          onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-          disabled={currentPage === 1}
-          className={`px-3 py-2 text-sm font-medium rounded border transition-colors
-            ${currentPage === 1
-              ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-              : "bg-white text-gray-700 hover:bg-gray-50"
-            }`}
-        >
-          ← 이전
-        </button>
-
-        {/* 페이지 번호 */}
-        <div className="flex gap-1">
-          {Array.from({ length: totalPages }, (_, i) => {
-            const pageNum = i + 1;
-            return (
-              <button
-                key={pageNum}
-                onClick={() => setCurrentPage(pageNum)}
-                className={`px-3 py-2 text-sm font-medium rounded border transition-colors
-                  ${currentPage === pageNum
-                    ? "bg-blue-500 text-white border-blue-500"
-                    : "bg-white text-gray-700 hover:bg-gray-50"
-                  }`}
-              >
-                {pageNum}
-              </button>
-            );
-          })}
-        </div>
-
-        {/* 다음 버튼 */}
-        <button
-          onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-          disabled={currentPage === totalPages}
-          className={`px-3 py-2 text-sm font-medium rounded border transition-colors
-            ${currentPage === totalPages
-              ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-              : "bg-white text-gray-700 hover:bg-gray-50"
-            }`}
-        >
-          다음 →
-        </button>
-      </div>
+    // 검색어로 필터링 (제목에서 검색)
+    return sourceNotices.filter((notice) =>
+      notice.title.toLowerCase().includes(searchKeyword.toLowerCase())
     );
   };
+
+  const getCurrentNotices = (): Notice[] => {
+    const filtered = getFilteredNotices();
+    const start = (currentPage - 1) * noticesPerPage;
+    return filtered.slice(start, start + noticesPerPage);
+  };
+
+  // 검색 결과에 따른 총 개수와 페이지 수 계산
+  const getDisplayStats = () => {
+    const filtered = getFilteredNotices();
+    return {
+      totalCount: filtered.length,
+      totalPages: Math.ceil(filtered.length / noticesPerPage),
+    };
+  };
+
+  const displayStats = getDisplayStats();
+
 
   return (
     <>
@@ -206,13 +189,17 @@ export default function NoticeBoard() {
           {/* 게시물 수와 검색창 */}
           <div className="flex flex-col gap-2 mb-6 sm:flex-row sm:items-center sm:justify-between">
             <p className="text-sm text-gray-700">
-              총 <strong>{totalCount}</strong>개의 게시물이 있습니다.
+              총 <strong>{displayStats.totalCount}</strong>개의 게시물이 있습니다.
+              {searchKeyword && ` (검색어: "${searchKeyword}")`}
             </p>
 
             <div className="flex gap-2">
               <NoticeBoardSearch
                 searchKeyword={searchKeyword}
-                setSearchKeyword={setSearchKeyword}
+                setSearchKeyword={(keyword) => {
+                  setSearchKeyword(keyword);
+                  setCurrentPage(1); // 검색 시 첫 페이지로 이동
+                }}
               />
             </div>
           </div>
@@ -232,7 +219,13 @@ export default function NoticeBoard() {
         )}
 
         {/* 페이지네이션 */}
-        {totalPages > 1 && renderPagination()}
+        {displayStats.totalPages > 1 && (
+          <Pagination
+            currentPage={currentPage}
+            totalPages={displayStats.totalPages}
+            onPageChange={setCurrentPage}
+          />
+        )}
       </div>
     </>
   );
