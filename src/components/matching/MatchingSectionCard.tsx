@@ -11,6 +11,30 @@ import {
   MatchingNewMember,
 } from "../../types/api/matching";
 
+// 기술 스택 색상 매핑
+const techColorMap: Record<string, string> = {
+  React: "bg-blue-100 text-blue-800",
+  Vue: "bg-green-100 text-green-800",
+  Angular: "bg-red-100 text-red-800",
+  JavaScript: "bg-yellow-100 text-yellow-800",
+  TypeScript: "bg-blue-200 text-blue-900",
+  Python: "bg-blue-100 text-blue-800",
+  Java: "bg-orange-100 text-orange-800",
+  "Spring Boot": "bg-green-100 text-green-800",
+  Node: "bg-green-200 text-green-900",
+  Express: "bg-gray-100 text-gray-800",
+  Django: "bg-green-100 text-green-900",
+  Flask: "bg-gray-100 text-gray-800",
+  MySQL: "bg-blue-100 text-blue-800",
+  PostgreSQL: "bg-blue-200 text-blue-900",
+  MongoDB: "bg-green-100 text-green-800",
+  Redis: "bg-red-100 text-red-800",
+  Docker: "bg-blue-100 text-blue-800",
+  Kubernetes: "bg-blue-200 text-blue-900",
+  AWS: "bg-orange-100 text-orange-800",
+  GCP: "bg-blue-100 text-blue-800",
+  Azure: "bg-blue-200 text-blue-900",
+};
 
 interface MatchingSectionCardProps {
   title: string;
@@ -36,11 +60,6 @@ export default function MatchingSectionCard({
   members,
   isLoading = false,
   error = null,
-<<<<<<< HEAD
-  //variant = "medium",
-=======
-  variant: _variant = "medium",
->>>>>>> 2be8411d39a9b0c025820389063328f00308422c
   maxDisplay = 4,
   sectionType,
 }: MatchingSectionCardPropsExtended) {
