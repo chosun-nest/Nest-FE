@@ -46,7 +46,7 @@ export default function FollowButton({ memberId }: FollowButtonProps) {
             : "bg-[#1E3A8A] text-white border-transparent hover:bg-[#5f7fce]"
         } ${loading ? "opacity-50 cursor-not-allowed" : ""}`}
     >
-      {loading ? "처리 중..." : isFollowing ? "Unfollow" : "Follow"}
+      {loading ? "처리 중..." : isFollowing ? "팔로잉" : "팔로우"}
     </button>
   );
 }

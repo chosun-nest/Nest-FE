@@ -219,16 +219,10 @@ export default function ProjectBoard() {
                 <span>
                   {project.author.name} · {project.createdAt}
                 </span>
-                <div className="flex items-center gap-3">
-                  <span className="flex items-center gap-1">
-                    👁️ {project.viewCount}
-                  </span>
-                  <span className="flex items-center gap-1">
-                    💬 {project.commentCount}
-                  </span>
-                  <span className="flex items-center gap-1">
-                    👥 {project.currentNumberOfMembers}/{project.maximumNumberOfMembers}
-                  </span>
+                <div className="flex gap-3">
+                  <span>조회수 {project.viewCount}</span>
+                  <span>댓글수 {project.commentCount}</span>
+                  <span>모집인원 {project.currentNumberOfMembers}/{project.maximumNumberOfMembers}</span>
                 </div>
               </div>
             </div>

@@ -183,9 +183,10 @@ export default function ProjectDetail() {
   };
 
   return (
-    <div className="max-w-6xl mx-auto px-4 pt-36 pb-10 flex flex-col lg:flex-row gap-8">
-      {/* 왼쪽 본문 영역 */}
-      <div className="flex-1">
+    <div className="min-h-screen pt-36 pb-10">
+      <div className="max-w-6xl mx-auto px-4 flex flex-col lg:flex-row gap-8">
+        {/* 왼쪽 본문 영역 */}
+        <div className="flex-1 bg-white p-6 rounded-lg shadow-sm">
         <h1 className="text-2xl font-bold text-[#00256c] mb-4 break-words">
           {project.projectTitle}
         </h1>
@@ -255,17 +256,18 @@ export default function ProjectDetail() {
         </button>
       </div>
 
-      {/* 오른쪽 참여자 카드 */}
-      <div className="w-full lg:w-[280px] shrink-0">
-        <ParticipantCardBox
-          project={project}
-          participants={project.projectMembers}
-          onOpenApplicantsModal={() => setShowApplicantsModal(true)}
-          onOpenApplyModal={() => setShowApplyModal(true)}
-          currentUserId={currentUserId!}
-          myApplicationStatus={myApplicationStatus}
-          myApplicationId={myApplicationId}
-        />
+        {/* 오른쪽 참여자 카드 */}
+        <div className="w-full lg:w-[280px] shrink-0">
+          <ParticipantCardBox
+            project={project}
+            participants={project.projectMembers}
+            onOpenApplicantsModal={() => setShowApplicantsModal(true)}
+            onOpenApplyModal={() => setShowApplyModal(true)}
+            currentUserId={currentUserId!}
+            myApplicationStatus={myApplicationStatus}
+            myApplicationId={myApplicationId}
+          />
+        </div>
       </div>
 
       {/* 지원자 관리 모달 (글쓴이용) */}
