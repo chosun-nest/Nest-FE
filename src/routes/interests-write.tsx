@@ -1,4 +1,4 @@
-// 관심분야 정보 게시판 글쓰기 페이지
+// 관심분야 게시판 글쓰기 페이지
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import Navbar from "../components/layout/navbar";

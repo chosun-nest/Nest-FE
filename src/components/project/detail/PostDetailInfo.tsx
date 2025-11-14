@@ -29,7 +29,7 @@ export default function PostDetailInfo({
       {/* 프로필 이미지 + 이름 */}
       <div className="flex items-center gap-2 cursor-pointer" onClick={onAuthorClick}>
         <img
-          src={author.profileImageUrl || "/assets/images/manager-bird.png"}
+          src={author.profileImageUrl || "/assets/images/user.png"}
           alt="프로필"
           className="object-cover w-8 h-8 rounded-full"
         />

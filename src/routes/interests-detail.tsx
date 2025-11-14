@@ -187,6 +187,7 @@ export default function InterestsDetail() {
             isAuthor={isAuthor}
             viewCount={post.viewCount}
             createdAt={post.createdAt}
+            updatedAt={post.updatedAt}
             onAuthorClick={() =>
                 navigateToProfile({
                 navigate,
@@ -226,12 +227,26 @@ export default function InterestsDetail() {
         <hr className="my-6 border-gray-200" />
 
         {/* 댓글 섹션 */}
-        <div className="mt-8 p-6 bg-[#f9fafb] border rounded-sm border-gray-200 shadow-sm">
+        <div className="px-5 py-4 mb-6 border rounded bg-gray-50">
+          <div className="flex items-center gap-2 mb-4 pb-3 border-b border-gray-200">
+            <h3 className="text-lg font-semibold text-gray-800">댓글</h3>
+            <span className="px-2 py-1 text-xs font-bold rounded-full bg-blue-100 text-blue-700 border border-blue-300">
+              {post.commentCount}
+            </span>
+          </div>
           <CommentSection
             boardType="INTEREST"
             postId={post.postId}
           />
         </div>
+
+        {/* 뒤로가기 */}
+        <button
+          onClick={() => navigate(-1)}
+          className="px-4 py-2 text-sm text-white rounded bg-slate-800"
+        >
+          ← 뒤로 가기
+        </button>
       </div>
 
       {/* 삭제 확인 모달 */}

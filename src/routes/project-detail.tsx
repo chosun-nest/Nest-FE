@@ -4,7 +4,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { selectAccessToken } from "../store/slices/authSlice";
 import { setUser, selectCurrentUserId } from "../store/slices/userSlice";
-import { getMemberProfile } from "../api/profile/ProfileAPI";
+import { getMemberProfile, getMemberProfileById } from "../api/profile/ProfileAPI";
 import {
   getProjectById,
   deleteProject,
@@ -41,6 +41,8 @@ export default function ProjectDetail() {
   const [myApplicationStatus, setMyApplicationStatus] = useState<
     "WAITING" | "ACCEPTED" | "REJECTED" | "CANCELED" | null
   >(null);
+  const [authorImageUrl, setAuthorImageUrl] = useState<string | null>(null);
+
   useEffect(() => {
     if (accessToken === undefined) return;
 
@@ -89,6 +91,21 @@ export default function ProjectDetail() {
 
     initialize();
   }, [id, accessToken]);
+
+  useEffect(() => {
+    if (!project) return;
+    const fetchAuthorImage = async () => {
+      try {
+        const profile = await getMemberProfileById(project.author.id);
+        setAuthorImageUrl(profile.memberImageUrl);
+      } catch (error) {
+        console.warn("작성자 이미지 로딩 실패", error);
+        setAuthorImageUrl(null);
+      }
+    };
+
+    fetchAuthorImage();
+  }, [project]);
 
   const handleEdit = () => {
     if (!project) return;
@@ -172,7 +189,7 @@ export default function ProjectDetail() {
               author={{
                 id: project.author.id,
                 name: project.author.name,
-                profileImageUrl: "",
+                profileImageUrl: authorImageUrl ?? undefined,
               }}
               isAuthor={isAuthor}
               createdAt={project.createdAt}
