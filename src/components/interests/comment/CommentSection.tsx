@@ -91,19 +91,18 @@ export default function CommentSection({ boardType, postId }: Props) {
   }, [comments]);
 
   const authorImageMap = useCommentAuthorProfiles(flattened);   // 단일 API 호출
-  
+
   return (
-    <div className="w-full mt-10 overflow-x-hidden">
-      <h3 className="mb-4 text-lg font-semibold">댓글</h3>
+    <div className="w-full overflow-x-hidden">
       <CommentForm
         onSubmit={handleAddComment}
         isLoggedIn={isLoggedIn}
         placeholder="댓글을 입력하세요"
       />
-      
+
       {/* 구분선 */}
       <hr className="my-6 border-gray-200" />
-      
+
       {loading ? (
         <SkeletonComment />
       ) : (

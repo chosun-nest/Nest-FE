@@ -228,11 +228,8 @@ export default function InterestsDetail() {
 
         {/* 댓글 섹션 */}
         <div className="px-5 py-4 mb-6 border rounded bg-gray-50">
-          <div className="flex items-center gap-2 mb-4 pb-3 border-b border-gray-200">
+          <div className="mb-4 pb-3 border-b border-gray-200">
             <h3 className="text-lg font-semibold text-gray-800">댓글</h3>
-            <span className="px-2 py-1 text-xs font-bold rounded-full bg-blue-100 text-blue-700 border border-blue-300">
-              {post.commentCount}
-            </span>
           </div>
           <CommentSection
             boardType="INTEREST"

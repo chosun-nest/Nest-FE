@@ -80,8 +80,7 @@ export default function CommentSection({ boardType, postId }: { boardType: Board
   };
 
   return (
-    <div className="w-full mt-10 overflow-x-hidden">
-      <h3 className="mb-4 text-lg font-semibold">댓글</h3>
+    <div className="w-full overflow-x-hidden">
       <CommentForm
         onSubmit={handleAddComment}
         isLoggedIn={isLoggedIn}
