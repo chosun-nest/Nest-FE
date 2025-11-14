@@ -24,8 +24,7 @@ interface ChatRoomProps {
 const WS_SERVER_URL = import.meta.env.VITE_API_CHAT_URL;
 
 export default function ChatRoom({
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  isMobile,
+  isMobile: _isMobile,
   chatRoom,
 }: ChatRoomProps) {
   const [currentUser, setCurrentUser] = useState<SimpleMemberProfile | null>(

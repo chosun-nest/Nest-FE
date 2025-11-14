@@ -59,7 +59,7 @@ export default function ProjectApply() {
         message,
       };
 
-      await applyToProject(Number(id), payload);
+      await applyToProject(payload);
 
       alert(`'${selectedPart}' 분야로 지원이 완료되었습니다!`);
       navigate(`/project/${id}`);

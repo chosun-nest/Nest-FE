@@ -1,5 +1,4 @@
 // 기술스택 검색 + 선택 + 삭제
-import React from "react";
 import { Item } from "./EditDepartment";
 
 interface Props {

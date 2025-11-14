@@ -22,7 +22,7 @@ export default function TagFilterModal({
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [errorMessage, setErrorMessage] = useState("");
   const [filteredTags, setFilteredTags] = useState<Tag[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [_isLoading, setIsLoading] = useState(false);
 
   // 전체 태그 불러오기 (게시판용 - 로컬 상태만 사용)
   useEffect(() => {

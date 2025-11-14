@@ -10,7 +10,6 @@ import {
   MatchingMemberByTechStack,
   MatchingNewMember,
 } from "../../types/api/matching";
-import techColorMap from "../../utils/tech-corlor-map";
 
 interface MatchingSectionCardProps {
   title: string;
@@ -36,7 +35,7 @@ export default function MatchingSectionCard({
   members,
   isLoading = false,
   error = null,
-  variant = "medium",
+  variant: _variant = "medium",
   maxDisplay = 4,
   sectionType,
 }: MatchingSectionCardPropsExtended) {

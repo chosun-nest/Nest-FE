@@ -18,9 +18,9 @@ export const getTopProjects = async ({
 }: Params): Promise<ProjectWithStatus[]> => {
   try {
     const res = await getProjects({
-      "pageable.page": 0,
-      "pageable.size": size,
-      "pageable.sort": "createdAt,desc",
+      page: 0,
+      size: size,
+      sort: "createdAt,desc",
     });
 
     const result: ProjectWithStatus[] = res.projects

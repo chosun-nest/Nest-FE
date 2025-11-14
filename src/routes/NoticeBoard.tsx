@@ -92,8 +92,7 @@ export default function NoticeBoard() {
 
           setPagedNotices(filtered);
 
-          const totalElements =
-            res.pageInfo?.totalElements || res.totalCount || filtered.length;
+          const totalElements = filtered.length;
 
           setTotalCount(totalElements);
           setTotalPages(Math.ceil(totalElements / noticesPerPage));

@@ -49,7 +49,7 @@ export default function EditMyProfile() {
 
   const [departmentsList, setDepartmentsList] = useState<Item[]>([]);
   const [techList, setTechList] = useState<Item[]>([]);
-  const [tagList, setTagList] = useState<Tag[]>([]);
+  const [_tagList, setTagList] = useState<Tag[]>([]);
 
   const [departmentInput, setDepartmentInput] = useState("");
   const [filteredDepartments, setFilteredDepartments] = useState<Item[]>([]);
