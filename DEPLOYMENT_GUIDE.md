@@ -105,10 +105,10 @@ OPENAI_API_KEY=""
 **`nginx/nginx.conf` 파일에서 수정:**
 ```bash
 # 1. 도메인 변경
-sed -i 's/your-domain.com/YOUR_ACTUAL_DOMAIN/g' nginx/nginx.conf
+sed -i 's/wantitnest.co.kr/YOUR_ACTUAL_DOMAIN/g' nginx/nginx.conf
 
 # 2. Private VM IP 변경
-sed -i 's/PRIVATE_VM_IP/YOUR_PRIVATE_VM_IP/g' nginx/nginx.conf
+sed -i 's/P34.158.215.187/YOUR_PRIVATE_VM_IP/g' nginx/nginx.conf
 ```
 
 또는 직접 편집:
