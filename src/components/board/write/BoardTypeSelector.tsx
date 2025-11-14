@@ -9,7 +9,7 @@ interface Props {
 }
 
 const boardTypeMap: Record<BoardType, string> = {
-  interests: "관심분야 정보 게시글 쓰기",
+  interests: "관심분야 게시글 등록",
   projects: "프로젝트 모집 등록",
 };
 

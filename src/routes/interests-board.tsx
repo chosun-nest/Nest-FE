@@ -1,4 +1,4 @@
-// 관심분야 정보 게시판 메인 페이지
+// 관심분야 게시판 메인 페이지
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
@@ -144,7 +144,7 @@ export default function InterestBoard() {
         {/* 제목, 정렬버튼(최신순, 좋아요순) */}
         <div className="px-1 mb-3">
           <div className="flex items-center justify-between">
-            <h2 className="text-2xl font-bold text-[#00256c]">관심분야 정보 게시판</h2>
+            <h2 className="text-2xl font-bold text-[#00256c]">관심분야 게시판</h2>
             <InterestBoardSortTabs sortType={sortType} onChange={setSortType} />
           </div>
         </div>
