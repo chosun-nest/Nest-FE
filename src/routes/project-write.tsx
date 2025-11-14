@@ -311,31 +311,31 @@ export default function ProjectWrite() {
     setShowModal(true);
   };
 
-  // 임시저장 불러오기
-  const handleLoadDraft = () => {
-    const saved = localStorage.getItem(AUTOSAVE_KEY);
-    if (saved) {
-      try {
-        const loadedData = JSON.parse(saved);
-        setFormData(loadedData);
-        setModalContent({
-          title: "불러오기 완료",
-          message: "임시저장된 내용을 불러왔습니다.",
-          type: "info",
-          onClose: () => setShowModal(false),
-        });
-        setShowModal(true);
-      } catch {
-        setModalContent({
-          title: "불러오기 실패",
-          message: "임시저장된 내용을 불러올 수 없습니다.",
-          type: "error",
-          onClose: () => setShowModal(false),
-        });
-        setShowModal(true);
-      }
-    }
-  };
+  // 임시저장 불러오기 (현재 미사용)
+  // const handleLoadDraft = () => {
+  //   const saved = localStorage.getItem(AUTOSAVE_KEY);
+  //   if (saved) {
+  //     try {
+  //       const loadedData = JSON.parse(saved);
+  //       setFormData(loadedData);
+  //       setModalContent({
+  //         title: "불러오기 완료",
+  //         message: "임시저장된 내용을 불러왔습니다.",
+  //         type: "info",
+  //         onClose: () => setShowModal(false),
+  //       });
+  //       setShowModal(true);
+  //     } catch {
+  //       setModalContent({
+  //         title: "불러오기 실패",
+  //         message: "임시저장된 내용을 불러올 수 없습니다.",
+  //         type: "error",
+  //         onClose: () => setShowModal(false),
+  //       });
+  //       setShowModal(true);
+  //     }
+  //   }
+  // };
 
   const updateForm = (newData: Partial<ProjectFormData>) => {
     setFormData((prev) => ({ ...prev, ...newData }));

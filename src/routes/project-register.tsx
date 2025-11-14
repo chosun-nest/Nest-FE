@@ -103,7 +103,7 @@ export default function ProjectWrite() {
       projectDescription: content,
       isRecruiting: true,
       tags: selectedTags,
-      partCounts,
+      parts: partCounts,
       ...(isEditMode && { membersToRemove: kickedMemberIds }), // ✅ 추방할 멤버 포함
     };
 

@@ -20,7 +20,7 @@ export default function StepFooter({
   onNext,
   onCancel,
   onComplete: onSubmit,
-  onSaveDraft,
+  onSaveDraft: _onSaveDraft,
   onPreview,
   isEditMode = false,
 }: StepFooterProps) {

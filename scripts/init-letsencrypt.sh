@@ -50,7 +50,7 @@ else
     echo "✓ 기존 인증서 발견"
 fi
 
-# 4. Nginx 컨테이너 시작
+# 4. Nginx 컨테이너 시작 (certbot은 아직 시작하지 않음)
 echo -e "${YELLOW}4. Nginx 시작 중...${NC}"
 docker compose -f docker-compose.prod.yml up -d frontend
 sleep 5
@@ -72,7 +72,8 @@ else
     STAGING_ARG=""
 fi
 
-docker compose -f docker-compose.prod.yml run --rm certbot certonly \
+# certbot 서비스의 entrypoint를 override하여 certonly 명령 실행
+docker compose -f docker-compose.prod.yml run --rm --entrypoint certbot certbot certonly \
     --webroot \
     --webroot-path=/var/www/certbot \
     --email $EMAIL \
@@ -88,8 +89,13 @@ else
     exit 1
 fi
 
-# 7. Nginx 재시작
-echo -e "${YELLOW}7. Nginx 재시작 중...${NC}"
+# 7. certbot 서비스 시작 (자동 갱신용)
+echo -e "${YELLOW}7. certbot 자동 갱신 서비스 시작 중...${NC}"
+docker compose -f docker-compose.prod.yml up -d certbot
+echo "✓ certbot 서비스 시작 완료"
+
+# 8. Nginx 재시작
+echo -e "${YELLOW}8. Nginx 재시작 중...${NC}"
 docker compose -f docker-compose.prod.yml restart frontend
 echo -e "${GREEN}✓ Nginx 재시작 완료${NC}"
 
