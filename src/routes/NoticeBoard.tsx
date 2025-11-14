@@ -1,6 +1,5 @@
 import { useEffect, useState, useRef } from "react";
 import Navbar from "../components/layout/navbar";
-import NoticeBoardHeader from "../components/notice/NoticeBoardHeader";
 import NoticeBoardSearch from "../components/notice/NoticeBoardSearch";
 import NoticeDropdown from "../components/notice/NoticeDropdown";
 import NoticeCard from "../components/notice/NoticeCard";
@@ -117,73 +116,56 @@ export default function NoticeBoard() {
 
   // 페이지네이션 구현
   const renderPagination = () => {
-    const pagesPerGroup = 10;
-    const currentGroup = Math.floor((currentPage - 1) / pagesPerGroup);
-    const groupStart = currentGroup * pagesPerGroup + 1;
-    const groupEnd = Math.min(groupStart + pagesPerGroup - 1, totalPages);
-
-    const pageNumbers = [];
-    for (let i = groupStart; i <= groupEnd; i++) {
-      pageNumbers.push(
+    return (
+      <div className="flex items-center justify-center gap-2 mt-6">
+        {/* 이전 버튼 */}
         <button
-          key={i}
-          onClick={() => setCurrentPage(i)}
-          className={`px-3 py-1 border rounded mx-1 ${
-            i === currentPage
-              ? "bg-nestblue text-white"
-              : "bg-white text-black hover:bg-nestblue/80 hover:text-white"
-          }`}
+          onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+          disabled={currentPage === 1}
+          className={`px-3 py-2 text-sm font-medium rounded border transition-colors
+            ${currentPage === 1
+              ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+              : "bg-white text-gray-700 hover:bg-gray-50"
+            }`}
         >
-          {i}
+          ← 이전
         </button>
-      );
-    }
 
-  return (
-    <div className="flex justify-center mt-6">
-      {/* << 맨 앞 */}
-      <button
-        onClick={() => setCurrentPage(1)}
-        disabled={currentPage === 1}
-        className="px-3 py-1 border rounded mx-1 hover:bg-nestblue/80 hover:text-white"
-      >
-        ≪
-      </button>
+        {/* 페이지 번호 */}
+        <div className="flex gap-1">
+          {Array.from({ length: totalPages }, (_, i) => {
+            const pageNum = i + 1;
+            return (
+              <button
+                key={pageNum}
+                onClick={() => setCurrentPage(pageNum)}
+                className={`px-3 py-2 text-sm font-medium rounded border transition-colors
+                  ${currentPage === pageNum
+                    ? "bg-blue-500 text-white border-blue-500"
+                    : "bg-white text-gray-700 hover:bg-gray-50"
+                  }`}
+              >
+                {pageNum}
+              </button>
+            );
+          })}
+        </div>
 
-      {/* < 이전 페이지 */}
-      <button
-        type="button"
-        onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-        disabled={currentPage === 1}
-        className="px-3 py-1 border rounded mx-1 hover:bg-nestblue/80 hover:text-white"
-      >
-        &lt;
-      </button>
-
-      {/* 페이지 목록 */}
-      {pageNumbers}
-
-      {/* > 다음 페이지 */}
-      <button
-        type="button"
-        onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-        disabled={currentPage === totalPages}
-        className="px-3 py-1 border rounded mx-1 hover:bg-nestblue/80 hover:text-white"
-      >
-        &gt;
-      </button>
-
-      {/* >> 맨 끝 */}
-      <button
-        onClick={() => setCurrentPage(totalPages)}
-        disabled={currentPage === totalPages}
-        className="px-3 py-1 border rounded mx-1 hover:bg-nestblue/80 hover:text-white"
-      >
-        ≫
-      </button>
-    </div>
-  );
-};
+        {/* 다음 버튼 */}
+        <button
+          onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+          disabled={currentPage === totalPages}
+          className={`px-3 py-2 text-sm font-medium rounded border transition-colors
+            ${currentPage === totalPages
+              ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+              : "bg-white text-gray-700 hover:bg-gray-50"
+            }`}
+        >
+          다음 →
+        </button>
+      </div>
+    );
+  };
 
   return (
     <>
@@ -192,45 +174,64 @@ export default function NoticeBoard() {
 
       {/* 2) navHeight 만큼 상단 padding을 준 콘텐츠 영역 */}
       <div
-        className="max-w-5xl mx-auto"
-        style={{ padding: `${navHeight}px 24px` }}
+        className="max-w-4xl min-h-screen p-4 mx-auto bg-white"
+        style={{ paddingTop: navHeight + 20 }}
       >
-        {/* 제목 */}
-        <NoticeBoardHeader />
+        {/* 헤더 영역 */}
+        <div className="px-1 mb-6">
+          {/* 제목과 카테고리 필터 */}
+          <div className="px-1 mb-3">
+            <div className="flex items-center justify-between">
+              <h2 className="text-2xl font-bold text-[#00256c]">공지사항 게시판</h2>
 
-        {/* 검색 */}
-        <div className="max-w-5xl px-4 mx-auto">
-          <NoticeDropdown selected={category} onChange={(cat) => {
-            setCategory(cat);
-            setCurrentPage(1);
-            if (cat === "전체") {
-              setAllNotices([]);
-            } else {
-              setPagedNotices([]);
-            }
-          }} />
-          <NoticeBoardSearch
-            searchKeyword={searchKeyword}
-            setSearchKeyword={setSearchKeyword}
-          />
-          <hr className="my-4" />
-          <p className="text-sm text-gray-700">
-            총 <strong>{totalCount}</strong>개의 게시물이 있습니다.
-          </p>
+              {/* 카테고리 필터 드롭다운 */}
+              <NoticeDropdown
+                selected={category}
+                onChange={(cat) => {
+                  setCategory(cat);
+                  setCurrentPage(1);
+                  if (cat === "전체") {
+                    setAllNotices([]);
+                  } else {
+                    setPagedNotices([]);
+                  }
+                }}
+              />
+            </div>
+          </div>
+
+          {/* 구분선 */}
+          <hr className="mb-4 border-t border-gray-300" />
+
+          {/* 게시물 수와 검색창 */}
+          <div className="flex flex-col gap-2 mb-6 sm:flex-row sm:items-center sm:justify-between">
+            <p className="text-sm text-gray-700">
+              총 <strong>{totalCount}</strong>개의 게시물이 있습니다.
+            </p>
+
+            <div className="flex gap-2">
+              <NoticeBoardSearch
+                searchKeyword={searchKeyword}
+                setSearchKeyword={setSearchKeyword}
+              />
+            </div>
+          </div>
         </div>
 
         {/* 공지 리스트 */}
-        <div className="mt-6">
-          {getCurrentNotices().length > 0 ? (
-            getCurrentNotices().map((notice, idx) => (
+        {getCurrentNotices().length > 0 ? (
+          <div className="space-y-4">
+            {getCurrentNotices().map((notice, idx) => (
               <NoticeCard key={idx} notice={notice} />
-            ))
-          ) : (
-            <p className="text-center text-gray-500">공지사항이 없습니다.</p>
-          )}
-        </div>
+            ))}
+          </div>
+        ) : (
+          <div className="py-10 text-center text-gray-500">
+            공지사항이 없습니다.
+          </div>
+        )}
 
-        {/*  페이지네이션 (공지 리스트 아래에) 표시 */}
+        {/* 페이지네이션 */}
         {totalPages > 1 && renderPagination()}
       </div>
     </>
