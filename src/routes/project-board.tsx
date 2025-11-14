@@ -7,7 +7,6 @@ import { getProjects, searchProjects } from "../api/project/ProjectAPI";
 import type { ProjectSummary } from "../types/api/project-board";
 import BoardWriteButton from "../components/board/write/BoardWriteButton";
 import useResponsive from "../hooks/responsive";
-import BoardTagFilterButton from "../components/board/tag/BoardTagFilterButton";
 import SelectedTagList from "../components/board/tag/SelectedTagList";
 import TagFilterModal from "../components/board/tag/TagFilterModal";
 
@@ -24,15 +23,12 @@ export default function ProjectBoard() {
   const [currentPage, setCurrentPage] = useState(1);
   const [projects, setProjects] = useState<ProjectSummary[]>([]);
   const [totalCount, setTotalCount] = useState(0);
-  const [loading, setLoading] = useState(true);
-  const [authError, setAuthError] = useState(false);
   const [searchKeyword, setSearchKeyword] = useState("");
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [showFilterModal, setShowFilterModal] = useState(false);
   const [filterType, setFilterType] = useState<FilterType>("ALL");
 
   const fetchData = async () => {
-    setLoading(true);
     try {
       const baseParams = {
         page: currentPage - 1,
@@ -63,15 +59,11 @@ export default function ProjectBoard() {
       setTotalCount(data.totalCount);
     } catch (error) {
       console.error("프로젝트 목록 불러오기 실패:", error);
-    } finally {
-      setLoading(false);
     }
   };
 
   useEffect(() => {
     if (!isAuthenticated) {
-      setAuthError(true);
-      setLoading(false);
       return;
     }
     fetchData();

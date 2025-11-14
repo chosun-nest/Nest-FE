@@ -20,8 +20,8 @@ export default function ImageCropModal({
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const handleCropComplete = (croppedArea: Area, croppedPixels: Area) => {
-    // croppedArea 삭제하면 이미지 확대가 되므로 삭제 금지
+  const handleCropComplete = (_croppedArea: Area, croppedPixels: Area) => {
+    // _croppedArea 파라미터는 react-easy-crop에서 필요하지만 사용하지 않음
     setCroppedAreaPixels(croppedPixels);
   };
 

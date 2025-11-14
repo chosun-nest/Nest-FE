@@ -211,11 +211,13 @@ export default function ProjectWrite() {
             <RecruitRoleList
               onChange={setRecruitCards}
               authorName={finalAuthorName}
-              defaultMembers={projectToEdit?.projectMembers?.map((member) => ({
-                memberName: member.memberName ?? "",
-                part: member.part,
-                memberId: member.memberId,
-              }))}
+              defaultMembers={projectToEdit?.projectMembers
+                ?.filter((member) => member.memberId !== null)
+                .map((member) => ({
+                  memberName: member.memberName ?? "",
+                  part: member.part,
+                  memberId: member.memberId as number,
+                }))}
               onKickMember={handleKickMember}
             />
           </div>

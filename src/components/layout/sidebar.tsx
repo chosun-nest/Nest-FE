@@ -11,7 +11,8 @@ import {
 } from "react-icons/md";
 import { useDispatch, useSelector } from "react-redux";
 import { clearTokens, selectAccessToken } from "../../store/slices/authSlice";
-import { getMemberProfile, MemberProfile } from "../../api/profile/ProfileAPI";
+import { getMemberProfile } from "../../api/profile/ProfileAPI";
+import type { MemberProfile } from "../../types/api/profile";
 
 interface SidebarProps {
   onClose: () => void;

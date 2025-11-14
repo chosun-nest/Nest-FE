@@ -85,14 +85,6 @@ export default function Ai() {
     setQuestion(e.target.value);
   }
 
-  function closeAndReset() {
-    setIsOpen(false);
-    setFooterStep("main");
-    setQuestion("");
-    setLoading(false);
-    // setMessages([]); // 필요에 따라 대화 초기화
-  }
-
   // footer 렌더
   function renderFooter() {
     if (footerStep === "main") {

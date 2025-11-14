@@ -3,5 +3,5 @@ import { mockProjects } from "../constants/mock-projects";
 
 export const ProjectContext = createContext({
   projects: mockProjects,
-  setProjects: (projects: any) => {},
+  setProjects: (_projects: any) => {},
 });

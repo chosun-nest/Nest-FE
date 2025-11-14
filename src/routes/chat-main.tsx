@@ -29,8 +29,7 @@ export default function ChatMain() {
   const { navbarHeight } = useNavbarHeight();
   const [mode, setMode] = useState<ChatMode>("following");
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [selectedUser, setSelectedUser] = useState<SimpleMemberProfile | null>(
+  const [_selectedUser, setSelectedUser] = useState<SimpleMemberProfile | null>(
     null
   );
   const [selectedRoom, setSelectedRoom] = useState<ChatRoomProfile | null>(
