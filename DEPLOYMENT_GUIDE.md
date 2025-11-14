@@ -50,8 +50,12 @@ sudo sh get-docker.sh
 sudo usermod -aG docker $USER
 
 # Docker Compose 설치
-sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-sudo chmod +x /usr/local/bin/docker-compose
+mkdir -p ~/.docker/cli-plugins/
+curl -SL https://github.com/docker/compose/releases/latest/download/docker-compose-linux-x86_64 \
+    -o ~/.docker/cli-plugins/docker-compose
+chmod +x ~/.docker/cli-plugins/docker-compose
+docker compose version  # (띄어쓰기!)
+
 
 # 로그아웃 후 재로그인
 ```
@@ -89,10 +93,11 @@ cd Nest-FE
 **`.env` 파일 생성:**
 ```bash
 # API 엔드포인트 (Nginx가 프록시하므로 /api로 시작)
-VITE_API_BASE_URL=https://your-domain.com/api/v1
+# VITE_API_BASE_URL="http://localhost:6030"
+VITE_API_BASE_URL="http://wantitnest.co.kr:6030"
+OPENAI_API_KEY=""
 
-# 기타 환경변수
-VITE_APP_NAME=WantITNest
+
 ```
 
 ### 2.3 Nginx 설정 수정
