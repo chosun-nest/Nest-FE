@@ -37,8 +37,15 @@ export interface ProjectSummary {
     name: string;
   };
   tags: string[];
+  // ✅ 추가 필드 (Swagger 기반)
+  parts: { [key: string]: number };           // 역할별 인원 구성
+  creatorRole: "LEADER" | "MEMBER";           // 생성자 직책
+  creatorPart: string;                        // 생성자 역할
+  currentNumberOfMembers: number;             // 현재 인원
+  maximumNumberOfMembers: number;             // 최대 인원
   viewCount: number;
   createdAt: string;
+  updatedAt: string;                          // 수정 시간
   commentCount: number;
   imageUrl: string;
   isRecruiting: boolean;
@@ -65,13 +72,19 @@ export interface ProjectDetail {
     id: number;
     name: string;
   };
+  // ✅ 추가 필드 (Swagger 기반)
+  parts: { [key: string]: number };           // 역할별 인원 구성
+  creatorRole: "LEADER" | "MEMBER";           // 생성자 직책
+  creatorPart: string;                        // 생성자 역할
+  projectMembers: ProjectMember[];
   viewCount: number;
   createdAt: string;
   updatedAt: string;
-  projectMembers: ProjectMember[];
   isRecruiting: boolean;
   currentNumberOfMembers: number;
   maximumNumberOfMembers: number;
+  commentCount: number;
+  imageUrl: string;
   // deadline?: string;          // 모집 마감일 - 추가 필요
   // projectStartDate?: string;  // 프로젝트 시작일 - 추가 필요
   // projectEndDate?: string;    // 프로젝트 종료일 - 추가 필요
@@ -89,7 +102,7 @@ export interface CreateProjectPayload {
   projectDescription?: string;
   isRecruiting: boolean;
   tags?: string[];
-  partCounts: {
+  parts: {                                    // ✅ partCounts → parts로 변경
     [key: string]: number;
   };
   creatorPart: string;
@@ -113,11 +126,11 @@ export interface UpdateProjectPayload {
   projectDescription: string;
   isRecruiting: boolean;
   tags: string[];
-  partCounts?: {
+  parts?: {                                   // ✅ partCounts → parts로 변경
     [key: string]: number;
   };
   imageUrls?: string[] | null;
-  membersToRemove?: number[]; // ✅ 추방할 멤버 ID 리스트
+  membersToRemove?: number[];                 // ✅ 추방할 멤버 ID 리스트
   // deadline?: string;          // 모집 마감일 - 추가 필요
   // projectStartDate?: string;  // 프로젝트 시작일 - 추가 필요
   // projectEndDate?: string;    // 프로젝트 종료일 - 추가 필요
@@ -159,4 +172,32 @@ export interface Applicant {
   message: string;
 }
 
+// ✅ 지원자 상태 통일용 타입 (ProjectApplyResponse와 호환)
+export interface DraftProject {
+  draftId?: number;
+  projectTitle?: string;
+  projectDescription?: string;
+  isRecruiting?: boolean;
+  tags?: string[];
+  parts?: {
+    [key: string]: number;
+  };
+  creatorPart?: string;
+  creatorRole?: string;
+  maximumNumberOfMembers?: number;
+  savedAt?: string;
+}
 
+// ✅ 프로젝트 상태
+export type ProjectStatus = "IN_PROGRESS" | "COMPLETED" | "CANCELLED";
+
+export interface UpdateProjectStatusRequest {
+  status: ProjectStatus;
+}
+
+// ✅ 기술 스택
+export interface TechStack {
+  id: number;
+  name: string;
+  category: string;
+}

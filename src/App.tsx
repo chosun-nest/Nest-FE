@@ -47,6 +47,7 @@ const router = createBrowserRouter([
       { path: "notice-board/", element: <NoticeBoard /> },
       { path: "interests-board/", element: <InterestsBorad /> },
       { path: "interests-detail/:id", element: <InterestsDetail /> },
+      { path: "project-board/", element: <ProjectBoard /> },
       { path: "chat/", element: <ChatMain /> },
       { path: "events/", element: <Events /> },
     ],
@@ -84,7 +85,6 @@ const router = createBrowserRouter([
           </ProtectedRoute>
         ),
       },
-      { path: "project-board/", element: <ProjectBoard /> },
       {
         path: "project-write",
         element: (

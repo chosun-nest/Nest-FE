@@ -93,19 +93,10 @@ export default function ProjectDetail() {
   const handleEdit = () => {
     if (!project) return;
 
-    const partCounts: Record<string, number> = {};
-    project.projectMembers.forEach((member) => {
-      if (member.part) {
-        partCounts[member.part] = (partCounts[member.part] || 0) + 1;
-      }
-    });
-
+    // project 객체에 이미 parts가 있으므로 그대로 전달
     navigate("/project-write", {
       state: {
-        project: {
-          ...project,
-          partCounts,
-        },
+        project: project,
       },
     });
   };
@@ -176,17 +167,26 @@ export default function ProjectDetail() {
 
         {/* 작성자 정보 + 버튼 */}
         <div className="flex items-start justify-between mb-6">
-          <PostDetailInfo
-            author={{
-              id: project.author.id,
-              name: project.author.name,
-              profileImageUrl: "",
-            }}
-            isAuthor={isAuthor}
-            createdAt={project.createdAt}
-            viewCount={project.viewCount}
-            onAuthorClick={handleAuthorClick}
-          />
+          <div>
+            <PostDetailInfo
+              author={{
+                id: project.author.id,
+                name: project.author.name,
+                profileImageUrl: "",
+              }}
+              isAuthor={isAuthor}
+              createdAt={project.createdAt}
+              updatedAt={project.updatedAt}
+              viewCount={project.viewCount}
+              onAuthorClick={handleAuthorClick}
+            />
+            {/* 작성자 역할 표시 */}
+            <div className="mt-2 ml-12">
+              <span className="inline-block px-3 py-1 text-xs font-semibold rounded-full bg-purple-100 text-purple-800 border border-purple-300">
+                👤 {project.creatorPart}
+              </span>
+            </div>
+          </div>
 
           <div className="flex items-center gap-2">
             {!isAuthor && <FollowButton memberId={project.author.id} />}
@@ -210,6 +210,12 @@ export default function ProjectDetail() {
 
         {/* 댓글 */}
         <div className="px-5 py-4 mb-6 border rounded bg-gray-50">
+          <div className="flex items-center gap-2 mb-4 pb-3 border-b border-gray-200">
+            <h3 className="text-lg font-semibold text-gray-800">댓글</h3>
+            <span className="px-2 py-1 text-xs font-bold rounded-full bg-blue-100 text-blue-700 border border-blue-300">
+              {project.commentCount}
+            </span>
+          </div>
           <CommentSection boardType="PROJECT" postId={project.projectId} />
         </div>
 
