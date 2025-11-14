@@ -52,15 +52,15 @@ fi
 
 # 4. Nginx 컨테이너 시작
 echo -e "${YELLOW}4. Nginx 시작 중...${NC}"
-docker-compose -f docker-compose.prod.yml up -d frontend
+docker compose -f docker compose.prod.yml up -d frontend
 sleep 5
 echo "✓ Nginx 시작 완료"
 
 # 5. 기존 임시 인증서 삭제
 echo -e "${YELLOW}5. 임시 인증서 삭제 중...${NC}"
-docker-compose -f docker-compose.prod.yml exec frontend rm -rf /etc/letsencrypt/live/$DOMAIN
-docker-compose -f docker-compose.prod.yml exec frontend rm -rf /etc/letsencrypt/archive/$DOMAIN
-docker-compose -f docker-compose.prod.yml exec frontend rm -rf /etc/letsencrypt/renewal/$DOMAIN.conf
+docker compose -f docker compose.prod.yml exec frontend rm -rf /etc/letsencrypt/live/$DOMAIN
+docker compose -f docker compose.prod.yml exec frontend rm -rf /etc/letsencrypt/archive/$DOMAIN
+docker compose -f docker compose.prod.yml exec frontend rm -rf /etc/letsencrypt/renewal/$DOMAIN.conf
 
 # 6. Let's Encrypt 인증서 발급
 echo -e "${YELLOW}6. Let's Encrypt 인증서 발급 중...${NC}"
@@ -72,7 +72,7 @@ else
     STAGING_ARG=""
 fi
 
-docker-compose -f docker-compose.prod.yml run --rm certbot certonly \
+docker compose -f docker compose.prod.yml run --rm certbot certonly \
     --webroot \
     --webroot-path=/var/www/certbot \
     --email $EMAIL \
@@ -90,7 +90,7 @@ fi
 
 # 7. Nginx 재시작
 echo -e "${YELLOW}7. Nginx 재시작 중...${NC}"
-docker-compose -f docker-compose.prod.yml restart frontend
+docker compose -f docker compose.prod.yml restart frontend
 echo -e "${GREEN}✓ Nginx 재시작 완료${NC}"
 
 echo ""
@@ -100,4 +100,4 @@ echo ""
 echo "인증서는 certbot에 의해 자동으로 갱신됩니다."
 echo ""
 echo -e "${YELLOW}다음 명령어로 상태를 확인하세요:${NC}"
-echo "  docker-compose -f docker-compose.prod.yml logs -f frontend"
+echo "  docker compose -f docker compose.prod.yml logs -f frontend"

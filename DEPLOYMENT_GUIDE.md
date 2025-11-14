@@ -108,7 +108,7 @@ OPENAI_API_KEY=""
 sed -i 's/wantitnest.co.kr/YOUR_ACTUAL_DOMAIN/g' nginx/nginx.conf
 
 # 2. Private VM IP 변경
-sed -i 's/P34.158.215.187/YOUR_PRIVATE_VM_IP/g' nginx/nginx.conf
+sed -i 's/34.158.215.187/YOUR_PRIVATE_VM_IP/g' nginx/nginx.conf
 ```
 
 또는 직접 편집:
