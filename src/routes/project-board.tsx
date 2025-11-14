@@ -9,6 +9,7 @@ import BoardWriteButton from "../components/board/write/BoardWriteButton";
 import useResponsive from "../hooks/responsive";
 import SelectedTagList from "../components/board/tag/SelectedTagList";
 import TagFilterModal from "../components/board/tag/TagFilterModal";
+import Pagination from "../components/interests/board/Pagination";
 
 const ITEMS_PER_PAGE = 8;
 
@@ -237,87 +238,11 @@ export default function ProjectBoard() {
 
       {/* 페이지네이션 */}
       {totalPages > 0 && (
-        <div className="flex items-center justify-center gap-2 mt-6">
-          {/* 이전 버튼 */}
-          <button
-            onClick={() => handlePageClick(currentPage - 1)}
-            disabled={currentPage === 1}
-            className={`px-3 py-2 text-sm font-medium rounded border transition-colors
-              ${currentPage === 1
-                ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                : "bg-white text-gray-700 hover:bg-gray-50"
-              }`}
-          >
-            ← 이전
-          </button>
-
-          {/* 페이지 번호 */}
-          <div className="flex gap-1">
-            {Array.from({ length: totalPages }, (_, i) => {
-              const pageNum = i + 1;
-              // 모바일에서는 현재 페이지 주변만 표시
-              if (isMobile) {
-                if (
-                  pageNum === 1 ||
-                  pageNum === totalPages ||
-                  (pageNum >= currentPage - 1 && pageNum <= currentPage + 1)
-                ) {
-                  return (
-                    <button
-                      key={pageNum}
-                      onClick={() => handlePageClick(pageNum)}
-                      className={`px-3 py-2 text-sm font-medium rounded border transition-colors
-                        ${currentPage === pageNum
-                          ? "bg-blue-500 text-white border-blue-500"
-                          : "bg-white text-gray-700 hover:bg-gray-50"
-                        }`}
-                    >
-                      {pageNum}
-                    </button>
-                  );
-                } else if (
-                  pageNum === currentPage - 2 ||
-                  pageNum === currentPage + 2
-                ) {
-                  return (
-                    <span key={pageNum} className="px-2 py-2 text-gray-400">
-                      ...
-                    </span>
-                  );
-                }
-                return null;
-              }
-
-              // 웹에서는 모든 페이지 표시
-              return (
-                <button
-                  key={pageNum}
-                  onClick={() => handlePageClick(pageNum)}
-                  className={`px-3 py-2 text-sm font-medium rounded border transition-colors
-                    ${currentPage === pageNum
-                      ? "bg-blue-500 text-white border-blue-500"
-                      : "bg-white text-gray-700 hover:bg-gray-50"
-                    }`}
-                >
-                  {pageNum}
-                </button>
-              );
-            })}
-          </div>
-
-          {/* 다음 버튼 */}
-          <button
-            onClick={() => handlePageClick(currentPage + 1)}
-            disabled={currentPage === totalPages}
-            className={`px-3 py-2 text-sm font-medium rounded border transition-colors
-              ${currentPage === totalPages
-                ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                : "bg-white text-gray-700 hover:bg-gray-50"
-              }`}
-          >
-            다음 →
-          </button>
-        </div>
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={handlePageClick}
+        />
       )}
 
       <BoardWriteButton />
