@@ -48,8 +48,6 @@ export default function NoticeBoard() {
 
   // 페이지네이션 상태
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [totalCount, setTotalCount] = useState(0);
   const noticesPerPage = 15;
 
   // mount 시점에 navbar 높이 계산
@@ -88,8 +86,6 @@ export default function NoticeBoard() {
 
           console.log("✅ 전체 공지:", sorted.length);
           setAllNotices(sorted);
-          setTotalCount(sorted.length);
-          setTotalPages(Math.ceil(sorted.length / noticesPerPage));
         } else {
           console.log(`📡 API 호출: ${category}, 전체 데이터 가져오기`);
           // 특정 카테고리도 모든 데이터를 한 번에 가져와서 프론트에서 페이지네이션
@@ -103,8 +99,6 @@ export default function NoticeBoard() {
 
           console.log(`✅ ${category} 전체 공지: ${allCategoryNotices.length}개`);
           setPagedNotices(allCategoryNotices);
-          setTotalCount(allCategoryNotices.length);
-          setTotalPages(Math.ceil(allCategoryNotices.length / noticesPerPage));
         }
       } catch (err) {
         console.error("❌ 공지 불러오기 실패:", err);
