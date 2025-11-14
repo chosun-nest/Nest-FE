@@ -13,6 +13,7 @@ import {
 
 import CommentSection from "../components/project/comment/CommentSection";
 import ApplicationModal from "../components/project/ApplicationModal";
+import ApplyFormModal from "../components/project/ApplyFormModal";
 import ConfirmModal from "../components/common/ConfirmModal";
 import ParticipantCardBox from "../components/project/ParticipantCardBox";
 
@@ -35,12 +36,14 @@ export default function ProjectDetail() {
   const [loading, setLoading] = useState(true);
   const [authError, setAuthError] = useState(false);
   const [notFound, setNotFound] = useState(false);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [showApplicantsModal, setShowApplicantsModal] = useState(false);
+  const [showApplyModal, setShowApplyModal] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const [myApplicationStatus, setMyApplicationStatus] = useState<
     "WAITING" | "ACCEPTED" | "REJECTED" | "CANCELED" | null
   >(null);
+  const [myApplicationId, setMyApplicationId] = useState<number | null>(null);
   const [authorImageUrl, setAuthorImageUrl] = useState<string | null>(null);
 
   useEffect(() => {
@@ -64,6 +67,10 @@ export default function ProjectDetail() {
         );
 
         const data = await getProjectById(Number(id));
+        console.log("📦 프로젝트 상세 데이터:", data);
+        console.log("👤 작성자 역할:", data.creatorPart);
+        console.log("👥 현재/최대 인원:", data.currentNumberOfMembers, "/", data.maximumNumberOfMembers);
+        console.log("📋 프로젝트 멤버:", data.projectMembers);
         setProject(data);
 
         if (user?.memberId && data?.projectId) {
@@ -72,7 +79,8 @@ export default function ProjectDetail() {
             const found = applicants.find((a) => a.memberId === user.memberId);
             if (found) {
               setMyApplicationStatus(found.status);
-              console.log("지원자 상태:", found.status);
+              setMyApplicationId(found.applicationId);
+              console.log("지원자 상태:", found.status, "ID:", found.applicationId);
             }
           } catch (err) {
             console.error("지원자 상태 조회 실패:", err);
@@ -198,11 +206,13 @@ export default function ProjectDetail() {
               onAuthorClick={handleAuthorClick}
             />
             {/* 작성자 역할 표시 */}
-            <div className="mt-2 ml-12">
-              <span className="inline-block px-3 py-1 text-xs font-semibold rounded-full bg-purple-100 text-purple-800 border border-purple-300">
-                👤 {project.creatorPart}
-              </span>
-            </div>
+            {project.creatorPart && (
+              <div className="mt-2 ml-12">
+                <span className="inline-block px-3 py-1 text-xs font-semibold rounded-full bg-purple-100 text-purple-800 border border-purple-300">
+                  👤 {project.creatorPart}
+                </span>
+              </div>
+            )}
           </div>
 
           <div className="flex items-center gap-2">
@@ -250,17 +260,35 @@ export default function ProjectDetail() {
         <ParticipantCardBox
           project={project}
           participants={project.projectMembers}
-          onOpenModal={() => setIsModalOpen(true)}
+          onOpenApplicantsModal={() => setShowApplicantsModal(true)}
+          onOpenApplyModal={() => setShowApplyModal(true)}
           currentUserId={currentUserId!}
           myApplicationStatus={myApplicationStatus}
+          myApplicationId={myApplicationId}
         />
       </div>
 
-      {/* 지원자 모달 */}
-      {isModalOpen && (
+      {/* 지원자 관리 모달 (글쓴이용) */}
+      {showApplicantsModal && (
         <ApplicationModal
-          onClose={() => setIsModalOpen(false)}
+          onClose={() => {
+            setShowApplicantsModal(false);
+            window.location.reload();
+          }}
           onAccept={() => {}}
+        />
+      )}
+
+      {/* 지원하기 모달 (일반 사용자용) */}
+      {showApplyModal && (
+        <ApplyFormModal
+          projectId={project.projectId}
+          projectTitle={project.projectTitle}
+          availableParts={project.projectMembers
+            .filter((m) => !m.memberName)
+            .map((m) => m.part)}
+          onClose={() => setShowApplyModal(false)}
+          onSuccess={() => window.location.reload()}
         />
       )}
 

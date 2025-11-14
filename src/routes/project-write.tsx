@@ -98,6 +98,7 @@ export default function ProjectWrite() {
   });
   const [showPreview, setShowPreview] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
+  const [createdProjectId, setCreatedProjectId] = useState<number | null>(null);
 
   // Navbar 높이 설정
   useEffect(() => {
@@ -224,9 +225,17 @@ export default function ProjectWrite() {
         parts[roleItem.role] = roleItem.count;
       });
 
-      // 최대 인원 계산 (모든 역할의 인원 합계)
-      const maximumNumberOfMembers = formData.roles.reduce(
-        (sum, roleItem) => sum + roleItem.count,
+      // 리더의 역할이 parts에 없으면 추가 (리더도 한 자리 차지)
+      if (!parts[formData.myRole]) {
+        parts[formData.myRole] = 1;
+      } else {
+        // 이미 있으면 카운트 증가 (리더 자리 포함)
+        parts[formData.myRole] += 1;
+      }
+
+      // 최대 인원 계산 (리더 포함한 모든 역할의 인원 합계)
+      const maximumNumberOfMembers = Object.values(parts).reduce(
+        (sum, count) => sum + count,
         0
       );
 
@@ -266,9 +275,10 @@ export default function ProjectWrite() {
           maximumNumberOfMembers,
         };
 
-        await createProjectPost(payload);
+        const response = await createProjectPost(payload);
         // 성공 시 로컬스토리지 자동저장 데이터 삭제
         localStorage.removeItem(AUTOSAVE_KEY);
+        setCreatedProjectId(response.projectId);
         setStep(3); // 완료 페이지로 이동
       }
     } catch (error) {
@@ -425,7 +435,7 @@ export default function ProjectWrite() {
           <StepSidebar currentStep={step} totalSteps={2} progress={getProgress()} />
           <div className="flex-1">
             {step === 3 ? (
-              <ProjectWriteComplete />
+              <ProjectWriteComplete projectId={createdProjectId} />
             ) : (
               <>
                 <StepContent

@@ -1,36 +1,63 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { applyToProject, getApplicantsByProjectId } from "../../api/project/ProjectAPI";
+import { getApplicantsByProjectId, cancelApplication } from "../../api/project/ProjectAPI";
 import type {
   ProjectDetail,
   ProjectMember,
-  ProjectApplyRequest,
   ProjectApplyResponse,
 } from "../../types/api/project-board";
 
 interface Props {
   project: ProjectDetail;
   participants: ProjectMember[];
-  onOpenModal: () => void;
+  onOpenApplicantsModal: () => void;
+  onOpenApplyModal: () => void;
   currentUserId: number;
   myApplicationStatus: "WAITING" | "ACCEPTED" | "REJECTED" | "CANCELED" | null;
+  myApplicationId: number | null;
 }
 
 export default function ParticipantCardBox({
   project,
   participants,
-  onOpenModal,
+  onOpenApplicantsModal,
+  onOpenApplyModal,
   currentUserId,
   myApplicationStatus,
+  myApplicationId,
 }: Props) {
   const navigate = useNavigate();
-  const [applyingPart, setApplyingPart] = useState<string | null>(null);
   const [applicantsByPart, setApplicantsByPart] = useState<Record<string, number>>({});
+  const [isCanceling, setIsCanceling] = useState(false);
 
   const isAuthor = project.author?.id === currentUserId;
-  const isClosed =
-    project.currentNumberOfMembers >= project.maximumNumberOfMembers;
+
+  // 현재 인원 수 계산 (실제로 멤버가 할당된 역할 수)
+  const actualCurrentMembers = participants.filter(m => m.memberName).length;
+
+  // 최대 인원 수 계산
+  // 1. API에서 maximumNumberOfMembers가 제대로 있으면 사용
+  // 2. 없으면 parts 객체에서 계산
+  // 3. 그것도 없으면 participants 길이 사용 (폴백)
+  const actualMaxMembers = project.maximumNumberOfMembers > 0
+    ? project.maximumNumberOfMembers
+    : project.parts
+      ? Object.values(project.parts).reduce((sum, count) => sum + count, 0)
+      : participants.length;
+
+  // 모집 마감 조건: 실제 인원이 최대 인원에 도달하거나, isRecruiting이 false
+  const isClosed = !project.isRecruiting || actualCurrentMembers >= actualMaxMembers;
+
+  // 디버깅 로그
+  console.log("🔍 ParticipantCardBox 디버깅:");
+  console.log("  - participants:", participants);
+  console.log("  - actualCurrentMembers:", actualCurrentMembers);
+  console.log("  - actualMaxMembers:", actualMaxMembers);
+  console.log("  - project.maximumNumberOfMembers:", project.maximumNumberOfMembers);
+  console.log("  - project.parts:", project.parts);
+  console.log("  - project.isRecruiting:", project.isRecruiting);
+  console.log("  - isClosed:", isClosed);
 
   // 역할별 지원자 수 조회
   useEffect(() => {
@@ -54,30 +81,21 @@ export default function ParticipantCardBox({
     fetchApplicants();
   }, [project.projectId]);
 
-  const handleApply = async (part: ProjectApplyRequest["part"]) => {
-    if (applyingPart) return;
-    setApplyingPart(part);
+  const handleCancelApplication = async () => {
+    if (!myApplicationId || isCanceling) return;
+
+    if (!confirm("정말로 지원을 취소하시겠습니까?")) return;
+
     try {
-      const payload: ProjectApplyRequest = {
-        projectId: project.projectId,
-        part,
-      };
-      await applyToProject(payload);
-      alert("지원이 완료되었습니다.");
-      window.location.reload(); // or trigger a refresh callback
+      setIsCanceling(true);
+      await cancelApplication(project.projectId, myApplicationId);
+      alert("지원이 취소되었습니다.");
+      window.location.reload();
     } catch (error: any) {
-      if (
-        error?.response?.status === 400 &&
-        typeof error.response.data === "string" &&
-        error.response.data.includes("이미 해당 파트에 지원")
-      ) {
-        alert("이미 해당 프로젝트에에 지원한 상태입니다.");
-      } else {
-        console.error("지원 실패:", error);
-        alert("지원 중 오류가 발생했습니다.");
-      }
+      console.error("지원 취소 실패:", error);
+      alert("지원 취소 중 오류가 발생했습니다.");
     } finally {
-      setApplyingPart(null);
+      setIsCanceling(false);
     }
   };
 
@@ -90,10 +108,10 @@ export default function ParticipantCardBox({
         </h2>
         {isAuthor && (
           <button
-            onClick={onOpenModal}
+            onClick={onOpenApplicantsModal}
             className="px-3 py-1.5 text-sm rounded bg-blue-600 text-white hover:bg-blue-700"
           >
-            지원서 확인
+            지원자 관리
           </button>
         )}
       </div>
@@ -115,12 +133,12 @@ export default function ParticipantCardBox({
             <div
               className="bg-blue-500 h-full transition-all duration-300"
               style={{
-                width: `${(project.currentNumberOfMembers / project.maximumNumberOfMembers) * 100}%`
+                width: actualMaxMembers > 0 ? `${(actualCurrentMembers / actualMaxMembers) * 100}%` : '0%'
               }}
             />
           </div>
           <span className="text-sm font-bold text-blue-600">
-            {project.currentNumberOfMembers} / {project.maximumNumberOfMembers}
+            {actualCurrentMembers} / {actualMaxMembers}
           </span>
         </div>
       </div>
@@ -157,35 +175,62 @@ export default function ParticipantCardBox({
                   {member.memberName}
                   {isLeader ? " 👑" : ""}
                 </button>
-              ) : isAuthor || isLeader ? (
-                <span className="text-sm text-gray-500">모집중</span>
-              ) : myApplicationStatus === "ACCEPTED" ? (
-                <span className="text-sm text-green-600 font-semibold">
-                  ✅ 수락됨
-                </span>
-              ) : myApplicationStatus === "WAITING" ? (
-                <span className="text-sm text-orange-500 font-semibold">⏳ 지원중</span>
               ) : (
-                <button
-                  onClick={() => handleApply(member.part)}
-                  disabled={isClosed || applyingPart === member.part}
-                  className={`text-sm px-3 py-1.5 rounded-md font-medium transition-colors ${
-                    isClosed || applyingPart === member.part
-                      ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                      : "bg-blue-600 text-white hover:bg-blue-700"
-                  }`}
-                >
-                  {isClosed
-                    ? "모집 완료"
-                    : applyingPart === member.part
-                      ? "지원 중..."
-                      : "지원하기"}
-                </button>
+                <span className="text-sm text-gray-500">모집중</span>
               )}
             </div>
           );
         })}
       </div>
+
+      {/* 내 지원 상태 또는 지원하기 버튼 */}
+      {!isAuthor && (
+        <div className="mt-4">
+          {myApplicationStatus === "WAITING" ? (
+            <div className="p-3 bg-orange-50 border border-orange-200 rounded-lg">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-semibold text-orange-800">⏳ 지원 대기중</p>
+                  <p className="text-xs text-orange-600 mt-1">프로젝트 리더의 승인을 기다리고 있습니다.</p>
+                </div>
+                <button
+                  onClick={handleCancelApplication}
+                  disabled={isCanceling}
+                  className="px-3 py-1.5 text-xs font-medium bg-red-500 text-white rounded-md hover:bg-red-600 disabled:opacity-50"
+                >
+                  {isCanceling ? "취소 중..." : "지원 취소"}
+                </button>
+              </div>
+            </div>
+          ) : myApplicationStatus === "ACCEPTED" ? (
+            <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
+              <p className="text-sm font-semibold text-green-800">✅ 지원 승인됨</p>
+              <p className="text-xs text-green-600 mt-1">프로젝트 팀원으로 승인되었습니다!</p>
+            </div>
+          ) : myApplicationStatus === "REJECTED" ? (
+            <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
+              <p className="text-sm font-semibold text-red-800">❌ 지원 거절됨</p>
+              <p className="text-xs text-red-600 mt-1">아쉽게도 이번 지원이 거절되었습니다.</p>
+            </div>
+          ) : myApplicationStatus === "CANCELED" ? (
+            <div className="p-3 bg-gray-50 border border-gray-200 rounded-lg">
+              <p className="text-sm font-semibold text-gray-800">🚫 지원 취소됨</p>
+              <p className="text-xs text-gray-600 mt-1">지원을 취소하셨습니다.</p>
+            </div>
+          ) : project.isRecruiting && !isClosed ? (
+            <button
+              onClick={onOpenApplyModal}
+              className="w-full px-4 py-3 text-sm font-semibold bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              🚀 프로젝트 지원하기
+            </button>
+          ) : (
+            <div className="p-3 bg-gray-50 border border-gray-200 rounded-lg">
+              <p className="text-sm font-semibold text-gray-600 text-center">모집이 마감되었습니다</p>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* API 미지원: 마감일 표시 (추후 지원 시 활성화) */}
       {/* {project.deadline && (
@@ -194,6 +239,6 @@ export default function ParticipantCardBox({
         </div>
       )} */}
     </div>
-  ); 
+  );
 
 }
