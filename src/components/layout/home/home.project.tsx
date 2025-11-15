@@ -11,6 +11,8 @@ type Project = {
   views: number;
   status: "모집중" | "모집완료";
   tags: string[];
+  currentNumberOfMembers: number;
+  maximumNumberOfMembers: number;
 };
 
 export default function HomeProject() {
@@ -30,6 +32,8 @@ export default function HomeProject() {
           views: p.viewCount,
           status: p.isRecruiting ? "모집중" : "모집완료",
           tags: p.tags,
+          currentNumberOfMembers: p.currentNumberOfMembers,
+          maximumNumberOfMembers: p.maximumNumberOfMembers,
         })
       );
       setProjects(mapped);
@@ -49,16 +53,19 @@ export default function HomeProject() {
           onClick={() => handleClick(project.id)}
           className="relative p-4 border rounded-lg cursor-pointer hover:shadow-sm transition"
         >
-          {/* 상태 배지 */}
-          <div className="absolute top-4 right-4">
+          {/* 상태 배지 + 모집 인원 */}
+          <div className="absolute top-4 right-4 flex flex-col items-end gap-1">
             <span
               className={`px-3 py-1 text-sm font-semibold rounded-full border ${
                 project.status === "모집중"
-                  ? "text-green-700 bg-green-100 border-green-300"
+                  ? "text-sky-700 bg-sky-100 border-sky-300"
                   : "text-gray-500 bg-gray-100 border-gray-300"
               }`}
             >
               {project.status}
+            </span>
+            <span className="text-sm font-medium text-gray-600">
+              {project.currentNumberOfMembers} / {project.maximumNumberOfMembers}
             </span>
           </div>
 
