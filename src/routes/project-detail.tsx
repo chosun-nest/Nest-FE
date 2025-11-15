@@ -193,28 +193,19 @@ export default function ProjectDetail() {
 
         {/* 작성자 정보 + 버튼 */}
         <div className="flex items-start justify-between mb-6">
-          <div>
-            <PostDetailInfo
-              author={{
-                id: project.author.id,
-                name: project.author.name,
-                profileImageUrl: authorImageUrl ?? undefined,
-              }}
-              isAuthor={isAuthor}
-              createdAt={project.createdAt}
-              updatedAt={project.updatedAt}
-              viewCount={project.viewCount}
-              onAuthorClick={handleAuthorClick}
-            />
-            {/* 작성자 역할 표시 */}
-            {project.creatorPart && (
-              <div className="mt-2 ml-12">
-                <span className="inline-block px-3 py-1 text-xs font-semibold rounded-full bg-purple-100 text-purple-800 border border-purple-300">
-                  👤 {project.creatorPart}
-                </span>
-              </div>
-            )}
-          </div>
+          <PostDetailInfo
+            author={{
+              id: project.author.id,
+              name: project.author.name,
+              profileImageUrl: authorImageUrl ?? undefined,
+            }}
+            isAuthor={isAuthor}
+            createdAt={project.createdAt}
+            updatedAt={project.updatedAt}
+            viewCount={project.viewCount}
+            onAuthorClick={handleAuthorClick}
+            creatorPart={project.creatorPart}
+          />
 
           <div className="flex items-center gap-2">
             {!isAuthor && <FollowButton memberId={project.author.id} />}
