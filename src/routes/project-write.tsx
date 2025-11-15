@@ -275,6 +275,8 @@ export default function ProjectWrite() {
           maximumNumberOfMembers,
         };
 
+        // console.log("📤 프로젝트 생성 요청 payload:", JSON.stringify(payload, null, 2));
+
         const response = await createProjectPost(payload);
         // 성공 시 로컬스토리지 자동저장 데이터 삭제
         localStorage.removeItem(AUTOSAVE_KEY);
