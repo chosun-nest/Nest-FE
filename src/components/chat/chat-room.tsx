@@ -21,7 +21,8 @@ interface ChatRoomProps {
   onBack: () => void;
 }
 
-const WS_SERVER_URL = import.meta.env.VITE_API_CHAT_URL;
+// nginx 프록시를 통한 상대 경로 사용 (빈 문자열 = 현재 호스트)
+const WS_SERVER_URL = import.meta.env.VITE_API_CHAT_URL || "";
 
 export default function ChatRoom({
   isMobile: _isMobile,

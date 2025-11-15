@@ -1,10 +1,11 @@
 export async function fetchChatBotAnswer(question: string): Promise<string> {
-  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+  // nginx 프록시를 통한 상대 경로 사용
+  const API_URL = "/api/chat";
 
   try {
-    console.log("🤖 챗봇 요청:", { url: `${API_BASE_URL}/api/chat`, question });
+    console.log("🤖 챗봇 요청:", { url: API_URL, question });
 
-    const res = await fetch(`${API_BASE_URL}/api/chat`, {
+    const res = await fetch(API_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({

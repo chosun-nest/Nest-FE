@@ -21,8 +21,9 @@ import {
 } from "../api/profile/ProfileAPI";
 import io from "socket.io-client";
 
-const WS_SERVER_URL = import.meta.env.VITE_API_CHAT_URL;
-const socket = io(WS_SERVER_URL, { transports: ["websocket"] });
+// nginx 프록시를 통한 상대 경로 사용 (빈 문자열 = 현재 호스트)
+const WS_SERVER_URL = import.meta.env.VITE_API_CHAT_URL || "";
+const socket = io(WS_SERVER_URL, { transports: ["websocket", "polling"] });
 
 export default function ChatMain() {
   const currentUserId = useSelector(selectCurrentUserId);
