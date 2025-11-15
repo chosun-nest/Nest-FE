@@ -191,20 +191,37 @@ export const updateApplicationStatus = async (
   );
 };
 
-// ✅ 지원 취소
+// ✅ 지원 취소 (POST 방식으로 변경)
 export const cancelApplication = async (
   projectId: number,
   applicationId: number
 ): Promise<void> => {
-  await API.delete(
-    `/api/v1/projects/${projectId}/applications/${applicationId}`,
+  await API.post(
+    `/api/v1/projects/${projectId}/applications/${applicationId}/cancel`,
+    {},
     { headers: { skipAuth: false } }
   );
+};
+
+// ✅ 내 지원서 목록 조회 (새로 추가)
+export const getMyApplications = async (): Promise<ProjectApplyResponse[]> => {
+  const response = await API.get("/api/v1/projects/applications/me", {
+    headers: { skipAuth: false },
+  });
+  return response.data;
 };
 
 // =========================================
 // [공통/기타]
 // =========================================
+
+// ✅ 프로젝트 참여 역할 목록 조회 (새로 추가)
+export const getProjectPartEnums = async (): Promise<string[]> => {
+  const response = await API.get("/api/v1/projects/members", {
+    headers: { skipAuth: true },
+  });
+  return response.data;
+};
 
 // 기술 스택 목록 조회 (GET)
 export const getTechStacks = async (): Promise<TechStack[]> => {
