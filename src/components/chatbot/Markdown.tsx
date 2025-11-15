@@ -38,7 +38,7 @@ export function Markdown({ children, isAssistant = false }: { children: string; 
             <li className="mb-0.5" {...props} />
           ),
           // 인라인 코드
-          code: ({ node, inline, ...props }) =>
+          code: ({ node, inline, ...props }: any) =>
             inline ? (
               <code
                 className={
