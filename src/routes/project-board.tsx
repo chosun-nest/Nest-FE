@@ -222,7 +222,11 @@ export default function ProjectBoard() {
                 <div className="flex gap-3">
                   <span>조회수 {project.viewCount}</span>
                   <span>댓글수 {project.commentCount}</span>
-                  <span>모집인원 {project.currentNumberOfMembers}/{project.maximumNumberOfMembers}</span>
+                  {project.maximumNumberOfMembers > 0 ? (
+                    <span>모집인원 {project.currentNumberOfMembers}/{project.maximumNumberOfMembers}</span>
+                  ) : (
+                    <span className="text-gray-400">모집인원 미설정</span>
+                  )}
                 </div>
               </div>
             </div>
