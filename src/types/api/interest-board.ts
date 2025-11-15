@@ -130,7 +130,7 @@ export interface SearchPostListResponse {
   pageInfo: PageInfo;
 }
 
-export type SearchType = "ALL" | "TITLE" | "CONTENT";
+export type SearchType = "ALL" | "TITLE" | "CONTENT" | "AUTHOR";
 
 export interface SearchPostsParams {
   keyword: string;

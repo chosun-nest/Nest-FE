@@ -120,10 +120,14 @@ export default function NoticeBoard() {
       return sourceNotices;
     }
 
-    // 검색어로 필터링 (제목에서 검색)
-    return sourceNotices.filter((notice) =>
-      notice.title.toLowerCase().includes(searchKeyword.toLowerCase())
-    );
+    // 검색어로 필터링 (제목, 작성자에서 검색)
+    return sourceNotices.filter((notice) => {
+      const keyword = searchKeyword.toLowerCase();
+      return (
+        notice.title.toLowerCase().includes(keyword) ||
+        notice.writer.toLowerCase().includes(keyword)
+      );
+    });
   };
 
   const getCurrentNotices = (): Notice[] => {

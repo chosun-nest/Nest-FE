@@ -3,14 +3,21 @@
 "use client";
 
 import { useState, CSSProperties, useRef, useEffect } from "react";
+import { useSelector } from "react-redux";
 import { MemoizedReactMarkdown } from "../chatbot/Markdown";
 import ScaleLoader from "react-spinners/ScaleLoader";
 import { fetchChatBotAnswer } from "../../api/ai/ai";
+import { selectCurrentUserName } from "../../store/slices/userSlice";
+import { selectIsLoggedIn } from "../../store/slices/authSlice";
 
 const ai = "/assets/images/ai.png";
 const ai_hover = "/assets/images/ai_hover.png";
 
-type Chat = { role: "user" | "assistant"; content: string };
+type Chat = {
+  role: "user" | "assistant";
+  content: string;
+  userName?: string; // 사용자 이름 저장용
+};
 
 const override: CSSProperties = {
   display: "block",
@@ -19,24 +26,30 @@ const override: CSSProperties = {
 };
 
 const FAQ_LIST = [
-  "회원가입은 어떻게 하나요?",
-  "비밀번호를 잊어버렸어요.",
-  "회원탈퇴 하고 싶어요",
-  // 필요시 추가
+  "이 사이트에 대해서 설명해주세요.",
+  "프로젝트 모집/지원 방법이 궁금해요",
+  "게시글은 어떻게 작성하나요?",
+  "내 프로필은 어떻게 수정하나요?",
+  "비밀번호를 잊어버렸어요",
 ];
-
-type FooterStep = "main" | "faq" | "direct";
 
 export default function Ai() {
   const [isOpen, setIsOpen] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
-  const [footerStep, setFooterStep] = useState<FooterStep>("main");
   const [question, setQuestion] = useState("");
   const [messages, setMessages] = useState<Chat[]>([]);
   const [loading, setLoading] = useState(false);
   const [showTooltip, setShowTooltip] = useState(true);
+  const [isFirstMessage, setIsFirstMessage] = useState(true); // 첫 메시지 여부
+  const [recommendedQuestions, setRecommendedQuestions] = useState<string[]>(FAQ_LIST); // 추천 질문 목록
   const [color] = useState("#ffffff");
+
   const chatEndRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  // Redux에서 사용자 정보 가져오기
+  const memberName = useSelector(selectCurrentUserName);
+  const isLoggedIn = useSelector(selectIsLoggedIn);
 
   // 입력란 자동 스크롤
   useEffect(() => {
@@ -45,9 +58,52 @@ export default function Ai() {
     }
   }, [messages, loading, isOpen]);
 
+  // 챗봇 오픈 시 초기 인사 메시지 추가
+  useEffect(() => {
+    if (isOpen && messages.length === 0) {
+      const userName = isLoggedIn && memberName ? `${memberName}님` : "비회원님";
+
+      // 로그인 사용자는 예시 포함, 비회원은 기본 인사만
+      const welcomeContent = isLoggedIn && memberName
+        ? `반갑습니다 ${userName}! 무엇을 도와드릴까요?
+
+**예시:**
+- 마일리지 관련 공지사항 검색해줘.
+- Python 관련 게시물 추천해줘.
+- AI 관련 프로젝트 추천해줘.`
+        : `반갑습니다 ${userName}! 무엇을 도와드릴까요?`;
+
+      const welcomeMessage: Chat = {
+        role: "assistant",
+        content: welcomeContent,
+      };
+      setMessages([welcomeMessage]);
+      setIsFirstMessage(true); // 첫 메시지 상태
+      setRecommendedQuestions(FAQ_LIST); // 초기 FAQ 설정
+    }
+  }, [isOpen, isLoggedIn, memberName, messages.length]);
+
+  // input 오토포커싱
+  useEffect(() => {
+    if (isOpen && inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [isOpen, loading, messages]); // loading이나 messages 변경 후에도 포커싱
+
   async function handleFaqClick(faq: string) {
+    if (isFirstMessage && isLoggedIn) {
+      setIsFirstMessage(false); // 첫 메시지 이후
+      // TODO: 백엔드에서 RAG 시스템으로 연관 질문을 받아오면 여기서 업데이트
+      // 예시: setRecommendedQuestions(response.relatedQuestions);
+      // 임시로 테스트용 질문 3개 표시 (로그인 사용자만)
+      setRecommendedQuestions(["임시질문1", "임시질문2", "임시질문3"]);
+    }
     setLoading(true);
-    const userMessage: Chat = { role: "user", content: faq };
+    const userMessage: Chat = {
+      role: "user",
+      content: faq,
+      userName: isLoggedIn && memberName ? `${memberName}님` : "비회원님",
+    };
     setMessages((prev) => [...prev, userMessage]);
     try {
       const answer = await fetchChatBotAnswer(faq);
@@ -63,9 +119,20 @@ export default function Ai() {
   }
 
   async function postChatAPI() {
-    if (!question.trim()) return;
+    if (!question.trim() || !isLoggedIn) return; // 비회원은 자유 질문 불가
+    if (isFirstMessage && isLoggedIn) {
+      setIsFirstMessage(false); // 첫 메시지 이후
+      // TODO: 백엔드에서 RAG 시스템으로 연관 질문을 받아오면 여기서 업데이트
+      // 예시: setRecommendedQuestions(response.relatedQuestions);
+      // 임시로 테스트용 질문 3개 표시 (로그인 사용자만)
+      setRecommendedQuestions(["임시질문1", "임시질문2", "임시질문3"]);
+    }
     setLoading(true);
-    const userMessage: Chat = { role: "user", content: question };
+    const userMessage: Chat = {
+      role: "user",
+      content: question,
+      userName: isLoggedIn && memberName ? `${memberName}님` : "비회원님",
+    };
     setMessages((prev) => [...prev, userMessage]);
     setQuestion("");
     try {
@@ -83,106 +150,6 @@ export default function Ai() {
 
   function handleQuestion(e: React.ChangeEvent<HTMLInputElement>) {
     setQuestion(e.target.value);
-  }
-
-  // footer 렌더
-  function renderFooter() {
-    if (footerStep === "main") {
-      return (
-        <div className="flex gap-2 w-full">
-          <button
-            className="flex-1 bg-blue-100 text-blue-800 py-2 rounded font-medium"
-            onClick={() => setFooterStep("faq")}
-            disabled={loading}
-          >
-            FAQ 질문보기
-          </button>
-          <button
-            className="flex-1 bg-gray-100 text-gray-700 py-2 rounded font-medium"
-            onClick={() => setFooterStep("direct")}
-            disabled={loading}
-          >
-            직접 질문하기
-          </button>
-        </div>
-      );
-    }
-    if (footerStep === "faq") {
-      return (
-        <div className="w-full flex flex-col gap-2">
-          <div className="flex flex-row items-center mb-2">
-            <button
-              className="text-xs text-blue-700 mr-2"
-              onClick={() => setFooterStep("main")}
-              disabled={loading}
-              style={{ background: "none", border: "none" }}
-            >
-              ←
-            </button>
-            <span className="font-semibold text-sm text-gray-700">
-              FAQ를 선택해 주세요
-            </span>
-          </div>
-          <div className="flex flex-wrap gap-1 mb-2">
-            {FAQ_LIST.map((faq, idx) => (
-              <button
-                key={idx}
-                onClick={() => handleFaqClick(faq)}
-                disabled={loading}
-                className="flex-1 bg-blue-100 text-blue-800 py-1 px-2 rounded text-xs"
-              >
-                {faq}
-              </button>
-            ))}
-          </div>
-          <button
-            className="bg-gray-100 text-gray-700 py-1 rounded font-medium"
-            onClick={() => setFooterStep("direct")}
-            disabled={loading}
-          >
-            원하는 질문이 없어요 (직접 질문)
-          </button>
-        </div>
-      );
-    }
-    if (footerStep === "direct") {
-      return (
-        <div className="flex items-center gap-2 w-full">
-          <button
-            className="text-xs text-blue-700"
-            onClick={() => setFooterStep("main")}
-            disabled={loading}
-            style={{ background: "none", border: "none" }}
-          >
-            ←
-          </button>
-          <input
-            className="flex-grow px-3 py-2 text-sm shadow-sm rounded-md ring-gray-300 dark:ring-gray-700 ring-1 ring-inset disabled:cursor-not-allowed bg-white dark:bg-gray-800 text-black dark:text-white"
-            placeholder="질문을 입력해주세요."
-            onChange={handleQuestion}
-            value={question}
-            disabled={loading}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") postChatAPI();
-            }}
-          />
-          <button
-            className="w-20 bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm rounded-md disabled:bg-gray-300 dark:disabled:bg-gray-700 disabled:cursor-not-allowed"
-            onClick={postChatAPI}
-            disabled={!question || loading}
-          >
-            <ScaleLoader
-              color={color}
-              loading={loading}
-              cssOverride={override}
-              height={15}
-              aria-label="Loading Spinner"
-            />
-            {!loading && "질문"}
-          </button>
-        </div>
-      );
-    }
   }
 
   return (
@@ -228,7 +195,6 @@ export default function Ai() {
       <button
         onClick={() => {
           setIsOpen((prev) => !prev);
-          setFooterStep("main");
           setShowTooltip(false);
         }}
         onMouseEnter={() => setIsHovered(true)}
@@ -253,45 +219,127 @@ export default function Ai() {
             </h2>
           </div>
           {/* 채팅 히스토리 */}
-          <div className="overflow-y-auto flex-grow pr-1 space-y-2 custom-scroll transition-all duration-300 ease-in-out">
+          <div className="overflow-y-auto flex-grow pr-1 space-y-3 custom-scroll transition-all duration-300 ease-in-out">
             {messages.map((message, index) => {
               const isUser = message.role === "user";
-              const displayName = isUser ? "me" : "위닛";
+              // userName이 저장되어 있으면 사용, 없으면 현재 Redux 상태 확인
+              const displayName = isUser
+                ? (message.userName || (isLoggedIn && memberName ? `${memberName}님` : "비회원님"))
+                : "위닛";
               const bgColor = isUser ? "#e0f7ff" : "#007acc";
               const textColor = isUser ? "#000000" : "#ffffff";
+              const avatarSrc = isUser
+                ? "/assets/images/chick.png"
+                : "/assets/images/ai.png";
+
               return (
                 <div
                   key={index}
-                  className="flex border-t border-gray-200 dark:border-gray-700 pt-3"
+                  className="flex flex-col border-t border-gray-200 dark:border-gray-700 pt-3"
                 >
-                  <p className="w-1/6 py-2 px-2 font-semibold text-sm text-gray-600 dark:text-gray-300">
-                    {displayName === "위닛" ? (
-                      <img src="/assets/images/ai.png" />
-                    ) : (
-                      <img src="/assets/images/chick.png" />
-                    )}
-                    {displayName}
-                  </p>
+                  {/* 상단: 아이콘과 이름 */}
+                  <div className="flex items-center gap-2 mb-2">
+                    <img
+                      src={avatarSrc}
+                      alt={displayName}
+                      className="w-8 h-8 rounded-full"
+                    />
+                    <span className="font-semibold text-sm text-gray-700 dark:text-gray-300">
+                      {displayName}
+                    </span>
+                  </div>
+                  {/* 하단: 메시지 박스 */}
                   <div
-                    className="w-5/6 px-3 py-2 rounded-2xl shadow-sm"
+                    className="px-3 py-2 rounded-2xl shadow-sm"
                     style={{
                       backgroundColor: bgColor,
                       color: textColor,
-                      whiteSpace: "pre-wrap",
                     }}
                   >
-                    <MemoizedReactMarkdown key={index}>
+                    <MemoizedReactMarkdown key={index} isAssistant={!isUser}>
                       {message.content}
                     </MemoizedReactMarkdown>
                   </div>
                 </div>
               );
             })}
-            {loading && <div className="msg-assistant">답변 생성 중...</div>}
+            {loading && <div className="text-sm text-gray-500 dark:text-gray-400 pl-2">답변 생성 중...</div>}
             <div ref={chatEndRef} />
           </div>
-          {/* 하단(footer): 메뉴 or 입력창 등 */}
-          <div className="mt-2">{renderFooter()}</div>
+
+          {/* 추천 질문 (FAQ 또는 연관 질문) */}
+          {recommendedQuestions.length > 0 && (
+            <div className="flex flex-col gap-2 mt-3 mb-2">
+              <div className="text-xs text-gray-500 dark:text-gray-400 px-1 mb-1">
+                {isFirstMessage ? "자주 묻는 질문" : "추천 질문"}
+              </div>
+              {isFirstMessage ? (
+                // 첫 메시지: 세로 스택
+                recommendedQuestions.map((faq, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => handleFaqClick(faq)}
+                    disabled={loading}
+                    className="w-full bg-blue-50 hover:bg-blue-100 text-blue-700 py-2 px-3 rounded-lg text-xs font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-left"
+                  >
+                    {faq}
+                  </button>
+                ))
+              ) : (
+                // 첫 메시지 이후: 가로 스크롤
+                <div
+                  className="flex gap-2 overflow-x-auto pb-2"
+                  style={{
+                    scrollbarWidth: 'thin',
+                    scrollbarColor: '#CBD5E0 transparent',
+                  }}
+                >
+                  {recommendedQuestions.map((faq, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => handleFaqClick(faq)}
+                      disabled={loading}
+                      className="flex-shrink-0 bg-blue-50 hover:bg-blue-100 text-blue-700 py-2 px-4 rounded-lg text-xs font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+                    >
+                      {faq}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* 입력창 */}
+          <div className="flex items-center gap-2 w-full mt-2">
+            <input
+              ref={inputRef}
+              className="flex-grow px-3 py-2 text-sm shadow-sm rounded-md ring-gray-300 dark:ring-gray-700 ring-1 ring-inset disabled:cursor-not-allowed bg-white dark:bg-gray-800 text-black dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:bg-gray-100 dark:disabled:bg-gray-800"
+              placeholder={isLoggedIn ? "질문을 입력해주세요." : "로그인 후 자유질문 입력이 가능합니다"}
+              onChange={handleQuestion}
+              value={question}
+              disabled={loading || !isLoggedIn}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && isLoggedIn) postChatAPI();
+              }}
+            />
+            <button
+              className="w-16 bg-indigo-600 hover:bg-indigo-700 px-3 py-2 text-sm font-semibold text-white shadow-sm rounded-md disabled:bg-gray-300 dark:disabled:bg-gray-700 disabled:cursor-not-allowed transition-colors"
+              onClick={postChatAPI}
+              disabled={!question.trim() || loading || !isLoggedIn}
+            >
+              {loading ? (
+                <ScaleLoader
+                  color={color}
+                  loading={loading}
+                  cssOverride={override}
+                  height={15}
+                  aria-label="Loading Spinner"
+                />
+              ) : (
+                "전송"
+              )}
+            </button>
+          </div>
         </div>
       )}
     </>

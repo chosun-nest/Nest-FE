@@ -86,7 +86,7 @@ export const getProjects = async (params: {
 // 게시글 검색(GET) - 인증 불필요
 export const searchProjects = async (params: {
   keyword: string;
-  searchType?: "ALL" | "TITLE" | "CONTENT";
+  searchType?: "ALL" | "TITLE" | "CONTENT" | "AUTHOR";
   tags?: string[];
   page: number;
   size: number;

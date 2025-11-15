@@ -135,7 +135,7 @@ export default function ProjectBoard() {
           <div className="flex gap-2">
             <input
               type="text"
-              placeholder="제목 또는 내용 검색"
+              placeholder="제목, 내용 또는 작성자 검색"
               value={searchKeyword}
               onChange={(e) => {
                 setSearchKeyword(e.target.value);

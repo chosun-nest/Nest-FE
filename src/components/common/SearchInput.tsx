@@ -12,7 +12,7 @@ export default function SearchInput({ value, onChange }: Props) {
       type="text"
       value={value}
       onChange={onChange}
-      placeholder="제목 검색"
+      placeholder="제목, 내용 또는 작성자 검색"
       style={{
         padding: "8px 12px",
         borderRadius: "6px",
