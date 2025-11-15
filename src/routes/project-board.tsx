@@ -194,6 +194,9 @@ export default function ProjectBoard() {
                 >
                   {project.isRecruiting ? "모집중" : "모집완료"}
                 </span>
+                <span className="text-sm font-medium text-gray-600">
+                  {project.currentNumberOfMembers} / {project.maximumNumberOfMembers}
+                </span>
                 <h2
                   className={`font-semibold ${isMobile ? "text-base" : "text-lg"}`}
                 >
@@ -222,7 +225,6 @@ export default function ProjectBoard() {
                 <div className="flex gap-3">
                   <span>조회수 {project.viewCount}</span>
                   <span>댓글수 {project.commentCount}</span>
-                  <span>모집인원 {project.currentNumberOfMembers}/{project.maximumNumberOfMembers}</span>
                 </div>
               </div>
             </div>
